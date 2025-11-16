@@ -1,0 +1,78 @@
+{
+  "warrior": {
+    "id": "warrior",
+    "name": "Warrior",
+    "starting_hp": 40,
+    "starting_damage": 10,
+    "starting_defense": 5,
+    "hp_per_level": 5,
+    "damage_per_level": 2,
+    "defense_per_level": 1,
+    "core_cards": [
+      "heavy_strike",
+      "cleave",
+      "berserker_rage",
+      "execute",
+      "power_strike"
+    ],
+    "description": "High-damage dealer with aggressive abilities",
+    "unlocked": true
+  },
+  "defender": {
+    "id": "defender",
+    "name": "Defender",
+    "starting_hp": 60,
+    "starting_damage": 6,
+    "starting_defense": 12,
+    "hp_per_level": 7,
+    "damage_per_level": 1,
+    "defense_per_level": 2,
+    "core_cards": [
+      "shield_bash",
+      "taunt",
+      "iron_wall",
+      "counter_stance",
+      "fortify"
+    ],
+    "description": "Protector who shields allies and absorbs damage",
+    "unlocked": true
+  },
+  "healer": {
+    "id": "healer",
+    "name": "Healer",
+    "starting_hp": 30,
+    "starting_damage": 5,
+    "starting_defense": 8,
+    "hp_per_level": 4,
+    "damage_per_level": 1,
+    "defense_per_level": 1,
+    "core_cards": [
+      "heal",
+      "prayer",
+      "regeneration",
+      "cleanse",
+      "revive"
+    ],
+    "description": "Keeps party alive with healing and support",
+    "unlocked": true
+  },
+  "fire_knight": {
+    "id": "fire_knight",
+    "name": "Fire Knight",
+    "starting_hp": 45,
+    "starting_damage": 12,
+    "starting_defense": 7,
+    "hp_per_level": 5,
+    "damage_per_level": 2,
+    "defense_per_level": 1,
+    "core_cards": [
+      "flame_strike",
+      "fire_wave",
+      "burning_armor",
+      "ignite",
+      "inferno"
+    ],
+    "description": "Master of fire magic with devastating elemental attacks",
+    "unlocked": false
+  }
+}

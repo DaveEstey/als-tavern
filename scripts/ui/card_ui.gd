@@ -1,0 +1,342 @@
+extends Control
+# Card UI Widget Script
+#
+# This script represents a single card displayed in the player's hand.
+# It handles card rendering, user interaction, and drag-and-drop functionality.
+#
+# SCENE STRUCTURE:
+# CardUI (Control) - Root node
+# ├── BackgroundPanel (ColorRect) - Card background colored by champion
+# ├── CardName (Label) - Displays card name
+# ├── CostLabel (Label) - Displays mana/cost requirement
+# ├── DescriptionLabel (Label) - Displays card effect text
+# └── CardTypeIcon (TextureRect) - Visual icon for card type
+#
+# INTERACTION FLOW:
+# 1. User clicks and holds on card → _gui_input detects InputEventMouseButton (pressed)
+# 2. is_being_dragged = true, original_position stored, mouse cursor captured
+# 3. _process updates card position to follow mouse while dragging
+# 4. Hovering over champions triggers champion selection (stored in selected_champion_index)
+# 5. Mouse release → check if over champion; if yes, emit card_dropped signal; if no, return to hand
+
+
+# ============================================================================
+# SIGNALS
+# ============================================================================
+
+## Emitted when mouse hovers over this card
+signal card_hovered(card_id: String)
+
+## Emitted when card is dropped on a champion
+## Parameters: card_id, champion_index, target_indices (affected units/areas)
+signal card_dropped(card_id: String, champion_index: int, target_indices: Array)
+
+
+# ============================================================================
+# PROPERTIES
+# ============================================================================
+
+# Card data loaded from CardDatabase
+var card_data: Dictionary = {}
+
+# Drag state tracking
+var is_being_dragged: bool = false
+var original_position: Vector2 = Vector2.ZERO
+
+# Current champion target (-1 means no champion selected)
+var selected_champion_index: int = -1
+
+# Drag and drop parameters
+var drag_offset: Vector2 = Vector2.ZERO
+var drag_sensitivity: float = 0.1
+var is_hovered: bool = false
+
+# Visual properties
+var normal_scale: Vector2 = Vector2(1.0, 1.0)
+var hover_scale: Vector2 = Vector2(1.1, 1.1)
+var drag_scale: Vector2 = Vector2(0.95, 0.95)
+var animation_speed: float = 0.15
+
+
+# ============================================================================
+# ONREADY VARIABLES (Node References)
+# ============================================================================
+
+@onready var background_panel: ColorRect = $BackgroundPanel
+@onready var card_name_label: Label = $CardName
+@onready var cost_label: Label = $CostLabel
+@onready var description_label: Label = $DescriptionLabel
+@onready var card_type_icon: TextureRect = $CardTypeIcon
+
+
+# ============================================================================
+# GDSCRIPT LIFECYCLE
+# ============================================================================
+
+func _ready() -> void:
+	"""
+	Called when node enters the scene tree.
+	Sets up UI signals and initializes visual state.
+	"""
+	# Connect mouse signals for hover effects
+	mouse_entered.connect(_on_mouse_entered)
+	mouse_exited.connect(_on_mouse_exited)
+
+	# Set up visual properties
+	normal_scale = scale
+
+	# Initialize with no champion selected
+	selected_champion_index = -1
+
+	# Make sure we can receive input
+	gui_input.connect(_gui_input)
+
+
+func _gui_input(event: InputEvent) -> void:
+	"""
+	Handles mouse input for drag-and-drop functionality.
+
+	- Left click: Start dragging the card
+	- Left release: Drop card on target or return to hand
+	"""
+	if event is InputEventMouseButton:
+		if event.button_index == MOUSE_BUTTON_LEFT:
+			if event.pressed:
+				# Start dragging
+				_start_drag()
+				get_tree().set_input_as_handled()
+			else:
+				# Release drag
+				_end_drag()
+				get_tree().set_input_as_handled()
+
+
+func _process(delta: float) -> void:
+	"""
+	Updates card position while dragging.
+	Smooth animation for returning to original position when not dragging.
+	"""
+	if is_being_dragged:
+		# Update position to follow mouse
+		var mouse_pos = get_global_mouse_position()
+		global_position = mouse_pos + drag_offset
+	else:
+		# Smoothly return to original position
+		global_position = global_position.lerp(original_position, delta / animation_speed)
+
+
+# ============================================================================
+# INITIALIZATION
+# ============================================================================
+
+func initialize(card_id: String) -> void:
+	"""
+	Loads card data from CardDatabase and populates UI elements.
+
+	Args:
+		card_id: The unique identifier of the card to load
+	"""
+	# Get card data from CardDatabase (assuming it's a global autoload)
+	card_data = CardDatabase.get_card(card_id)
+
+	if card_data.is_empty():
+		push_error("Card with ID '%s' not found in CardDatabase" % card_id)
+		return
+
+	# Populate card name
+	if card_name_label:
+		card_name_label.text = card_data.get("name", "Unknown Card")
+
+	# Populate cost/mana requirement
+	if cost_label:
+		var cost = card_data.get("cost", 0)
+		cost_label.text = str(cost)
+
+	# Populate description/effect text
+	if description_label:
+		description_label.text = card_data.get("description", "")
+
+	# Set background color based on champion
+	var champion_id = card_data.get("champion_id", "")
+	var champion_color = get_champion_color(champion_id)
+	if background_panel:
+		background_panel.color = champion_color
+
+	# Load and set card type icon if available
+	if card_type_icon and card_data.has("icon_path"):
+		card_type_icon.texture = load(card_data.get("icon_path", ""))
+
+
+# ============================================================================
+# DRAG AND DROP LOGIC
+# ============================================================================
+
+func _start_drag() -> void:
+	"""
+	Initiates drag operation.
+	Stores original position and calculates mouse offset for smooth dragging.
+	"""
+	is_being_dragged = true
+	original_position = global_position
+
+	# Calculate offset between card center and mouse position
+	var mouse_pos = get_global_mouse_position()
+	drag_offset = global_position - mouse_pos
+
+	# Visual feedback: slightly reduce scale while dragging
+	var tween = create_tween()
+	tween.set_trans(Tween.TRANS_QUAD)
+	tween.set_ease(Tween.EASE_OUT)
+	tween.tween_property(self, "scale", drag_scale, 0.1)
+
+	# Emit hover signal
+	card_hovered.emit(card_data.get("id", ""))
+
+
+func _end_drag() -> void:
+	"""
+	Completes drag operation.
+	Checks if card was dropped on a champion target.
+	If valid target: emit card_dropped signal
+	If invalid target: return card to original position in hand
+	"""
+	is_being_dragged = false
+
+	# Check if we have a valid champion target
+	if selected_champion_index >= 0:
+		# Valid drop on champion
+		var target_indices: Array = []
+
+		# Add any additional target information if needed
+		# (e.g., if card targets multiple units)
+		if card_data.has("target_indices"):
+			target_indices = card_data.get("target_indices", [])
+
+		# Emit the drop signal
+		card_dropped.emit(
+			card_data.get("id", ""),
+			selected_champion_index,
+			target_indices
+		)
+
+		# Reset selection
+		selected_champion_index = -1
+
+	# Return card to hand (original position) with animation
+	var tween = create_tween()
+	tween.set_trans(Tween.TRANS_QUAD)
+	tween.set_ease(Tween.EASE_OUT)
+	tween.tween_property(self, "global_position", original_position, animation_speed)
+	tween.parallel().tween_property(self, "scale", normal_scale, animation_speed)
+
+
+# ============================================================================
+# HOVER EFFECTS
+# ============================================================================
+
+func _on_mouse_entered() -> void:
+	"""
+	Called when mouse enters the card area.
+	Enlarges the card for preview and highlights it.
+	"""
+	is_hovered = true
+
+	# Only apply hover scale if not currently dragging
+	if not is_being_dragged:
+		var tween = create_tween()
+		tween.set_trans(Tween.TRANS_QUAD)
+		tween.set_ease(Tween.EASE_OUT)
+		tween.tween_property(self, "scale", hover_scale, animation_speed)
+
+
+func _on_mouse_exited() -> void:
+	"""
+	Called when mouse leaves the card area.
+	Returns card to normal size.
+	"""
+	is_hovered = false
+
+	# Only apply normal scale if not currently dragging
+	if not is_being_dragged:
+		var tween = create_tween()
+		tween.set_trans(Tween.TRANS_QUAD)
+		tween.set_ease(Tween.EASE_OUT)
+		tween.tween_property(self, "scale", normal_scale, animation_speed)
+
+
+# ============================================================================
+# CHAMPION COLOR MAPPING
+# ============================================================================
+
+func get_champion_color(champion_id: String) -> Color:
+	"""
+	Returns the visual color associated with a champion.
+	Colors are used to theme the card background.
+
+	Args:
+		champion_id: The unique identifier of the champion
+
+	Returns:
+		Color: RGBA color for the champion, or default gray if not found
+	"""
+	# Color mapping for different champions
+	var champion_colors: Dictionary = {
+		"champion_1": Color(0.8, 0.2, 0.2, 0.9),  # Red
+		"champion_2": Color(0.2, 0.8, 0.2, 0.9),  # Green
+		"champion_3": Color(0.2, 0.2, 0.8, 0.9),  # Blue
+		"champion_4": Color(0.8, 0.8, 0.2, 0.9),  # Yellow
+		"champion_5": Color(0.8, 0.2, 0.8, 0.9),  # Magenta
+	}
+
+	# Return color if champion exists, otherwise default gray
+	if champion_colors.has(champion_id):
+		return champion_colors[champion_id]
+	else:
+		return Color(0.5, 0.5, 0.5, 0.8)  # Default gray
+
+
+# ============================================================================
+# UTILITY METHODS
+# ============================================================================
+
+func set_champion_target(champion_index: int) -> void:
+	"""
+	Sets the currently targeted champion for card dropping.
+
+	Args:
+		champion_index: Index of the champion (-1 to clear selection)
+	"""
+	selected_champion_index = champion_index
+
+	# Visual feedback: highlight when champion is selected
+	if selected_champion_index >= 0 and background_panel:
+		background_panel.modulate = Color(1.2, 1.2, 1.2, 1.0)  # Brighten
+	elif background_panel:
+		background_panel.modulate = Color(1.0, 1.0, 1.0, 1.0)  # Normal
+
+
+func clear_champion_target() -> void:
+	"""
+	Clears the currently selected champion target.
+	"""
+	set_champion_target(-1)
+
+
+func get_card_id() -> String:
+	"""
+	Returns the ID of the card represented by this widget.
+
+	Returns:
+		String: The card's unique identifier
+	"""
+	return card_data.get("id", "")
+
+
+func get_card_cost() -> int:
+	"""
+	Returns the mana/resource cost of the card.
+
+	Returns:
+		int: The card's cost
+	"""
+	return card_data.get("cost", 0)
