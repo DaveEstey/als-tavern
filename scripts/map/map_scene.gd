@@ -163,15 +163,13 @@ func create_node_ui(node_data: Dictionary) -> Control:
 	node_ui.custom_minimum_size = NODE_SIZE
 	node_ui.size = NODE_SIZE
 
-	# Position based on layer and position in layer
-	var layer: int = node_data.get("layer", 0)
-	var layer_position: int = node_data.get("layer_position", 0)
-	var nodes_in_layer: int = node_data.get("nodes_in_layer", 1)
+	# Position based on grid coordinates from map generator
+	# position is a Vector2i where x = column, y = row
+	var grid_pos: Vector2i = node_data.get("position", Vector2i(0, 0))
 
-	# Calculate position (centered in layer)
-	var x_offset = (node_grid.size.x / 2.0) - ((nodes_in_layer - 1) * NODE_SPACING / 2.0)
-	var x_pos = x_offset + (layer_position * NODE_SPACING)
-	var y_pos = 100.0 + (layer * LAYER_SPACING)
+	# Calculate visual position
+	var x_pos = 100.0 + (grid_pos.x * NODE_SPACING)
+	var y_pos = 100.0 + (grid_pos.y * LAYER_SPACING)
 
 	node_ui.position = Vector2(x_pos, y_pos)
 
@@ -354,8 +352,8 @@ func update_available_nodes() -> void:
 	if current_node.is_empty():
 		return
 
-	# Get connected nodes
-	var connected_ids: Array = current_node.get("connected_to", [])
+	# Get connected nodes (using "connections" field from map generator)
+	var connected_ids: Array = current_node.get("connections", [])
 	available_nodes.assign(connected_ids)
 
 	# Update visual state of all nodes
@@ -630,9 +628,14 @@ func _find_node_by_id(node_id: int) -> Dictionary:
 
 ## Find the starting node ID
 func _find_starting_node() -> int:
+	# Find the node at row 0 (starting position)
 	for node in current_map:
-		if node.get("type", "") == "start":
+		var pos: Vector2i = node.get("position", Vector2i(0, 0))
+		if pos.y == 0:
 			return node.get("id", 0)
+	# Fallback: return first node if no row 0 found
+	if not current_map.is_empty():
+		return current_map[0].get("id", 0)
 	return 0
 
 
