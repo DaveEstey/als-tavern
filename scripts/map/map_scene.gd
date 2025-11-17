@@ -603,8 +603,10 @@ func _update_player_position() -> void:
 ## Update UI elements
 func _update_ui() -> void:
 	# Update gold label
-	if gold_label and game_manager:
-		gold_label.text = "Gold: %d" % game_manager.get("player_gold", 0)
+	if gold_label and game_manager and "player_gold" in game_manager:
+		gold_label.text = "Gold: %d" % game_manager.player_gold
+	elif gold_label:
+		gold_label.text = "Gold: 0"
 
 	# Update floor label
 	if floor_label:
