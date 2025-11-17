@@ -56,6 +56,13 @@ signal party_confirmed(champion_ids: Array[String], deck_data: Dictionary)
 
 
 # ============================================================================
+# CONSTANTS
+# ============================================================================
+
+const MAP_SCENE: String = "res://scenes/map/map_scene.tscn"
+
+
+# ============================================================================
 # PROPERTIES
 # ============================================================================
 
@@ -610,12 +617,16 @@ func _on_confirm_button_pressed() -> void:
 		return
 
 	# Save party to PartyManager
-	PartyManager.set_active_party(selected_champions)
+	if PartyManager:
+		PartyManager.set_active_party(selected_champions)
 
-	# Save card selections for each champion
-	for champion_id in selected_champions:
-		var cards = deck_data.get(champion_id, [])
-		PartyManager.set_selected_cards(champion_id, cards)
+		# Save card selections for each champion
+		for champion_id in selected_champions:
+			var cards = deck_data.get(champion_id, [])
+			PartyManager.set_selected_cards(champion_id, cards)
+	else:
+		push_error("PartyManager not found, cannot save party")
+		return
 
 	# Emit signal with party data
 	party_confirmed.emit(selected_champions, deck_data)
@@ -623,6 +634,13 @@ func _on_confirm_button_pressed() -> void:
 	print("Party confirmed!")
 	print("Champions: ", selected_champions)
 	print("Deck data: ", deck_data)
+
+	# Transition to map scene
+	if ResourceLoader.exists(MAP_SCENE):
+		print("Transitioning to map scene...")
+		get_tree().change_scene_to_file(MAP_SCENE)
+	else:
+		push_error("Map scene not found at: " + MAP_SCENE)
 
 
 func is_party_valid() -> bool:
