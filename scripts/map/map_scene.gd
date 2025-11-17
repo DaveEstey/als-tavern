@@ -465,7 +465,7 @@ func _open_rest_site() -> void:
 		map_info_label.text = "You rest and recover."
 
 	# Heal all champions
-	if game_manager and game_manager.has("party_manager"):
+	if game_manager and "party_manager" in game_manager:
 		var party_manager = game_manager.party_manager
 		if party_manager and party_manager.has_method("heal_all_champions"):
 			party_manager.heal_all_champions(9999)  # Full heal

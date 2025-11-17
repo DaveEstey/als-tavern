@@ -4,17 +4,17 @@ extends Node
 
 # Battle participants
 var champions: Array[Champion] = []  # 3 champions from party
-var enemies: Array = []  # 1-3 enemy dictionaries {id, name, hp, max_hp, damage, defense, block, is_dead}
+var enemies: Array[Dictionary] = []  # 1-3 enemy dictionaries {id, name, hp, max_hp, damage, defense, block, is_dead}
 
 # Deck management
-var deck: Array = []  # 15 card IDs from party deck
-var hand: Array = []  # Current hand of 5 cards
-var discard_pile: Array = []
+var deck: Array[String] = []  # 15 card IDs from party deck
+var hand: Array[String] = []  # Current hand of 5 cards
+var discard_pile: Array[String] = []
 
 # Battle state
 var current_phase: String = "player_turn"  # player_turn, enemy_turn, victory, defeat
 var actions_remaining: int = 3  # 3 actions per turn, one per champion
-var champions_acted: Array = []  # Track which champion indices used their action this turn
+var champions_acted: Array[int] = []  # Track which champion indices used their action this turn
 
 # References
 var card_database: Node
@@ -23,7 +23,7 @@ var party_manager: Node
 # Signals
 signal turn_started(phase: String)
 signal card_drawn
-signal card_played(card: Card, caster: Champion, targets: Array)
+signal card_played(card: Card, caster: Champion, targets: Array[Variant])
 signal champion_acted(champion: Champion, action_type: String)
 signal damage_dealt(source, target, amount: int)
 signal champion_died(champion: Champion)
@@ -44,7 +44,7 @@ func _ready() -> void:
 
 ## Initialize battle with given enemy IDs
 ## Loads enemies, champions, builds deck and starts first turn
-func initialize_battle(enemy_ids: Array) -> void:
+func initialize_battle(enemy_ids: Array[String]) -> void:
 	# Clear previous battle state
 	champions.clear()
 	enemies.clear()
@@ -74,7 +74,7 @@ func initialize_battle(enemy_ids: Array) -> void:
 
 
 ## Load enemies from CardDatabase
-func _load_enemies(enemy_ids: Array) -> void:
+func _load_enemies(enemy_ids: Array[String]) -> void:
 	if not card_database:
 		push_error("Cannot load enemies: CardDatabase not available")
 		return
@@ -109,6 +109,9 @@ func _load_champions() -> void:
 		return
 
 	var party_ids = party_manager.get_active_party()
+	if not party_ids:
+		push_error("Failed to get active party from PartyManager")
+		return
 
 	for champ_id in party_ids:
 		var champion = Champion.new()
@@ -123,7 +126,17 @@ func _build_deck() -> void:
 		push_error("Cannot build deck: PartyManager not available")
 		return
 
-	deck = party_manager.get_party_deck()
+	var party_deck = party_manager.get_party_deck()
+	if not party_deck:
+		push_error("Failed to get party deck from PartyManager")
+		return
+
+	# Ensure deck is properly typed
+	deck.clear()
+	for card_id in party_deck:
+		if card_id is String:
+			deck.append(card_id)
+
 	print("Deck built with %d cards" % deck.size())
 
 
@@ -144,8 +157,8 @@ func start_player_turn() -> void:
 
 	# Reset enemy blocks
 	for enemy in enemies:
-		if not enemy.is_dead:
-			enemy.block = 0
+		if not enemy.get("is_dead", false):
+			enemy["block"] = 0
 
 	# Discard current hand
 	discard_hand()
@@ -361,7 +374,7 @@ func execute_enemy_turn() -> void:
 
 	# Each alive enemy performs an action
 	for enemy in enemies:
-		if enemy.is_dead:
+		if enemy.get("is_dead", false):
 			continue
 
 		# Choose target based on attack pattern
@@ -371,13 +384,13 @@ func execute_enemy_turn() -> void:
 			continue
 
 		# Execute attack
-		var damage_amount = enemy.damage
+		var damage_amount = enemy.get("damage", 0)
 		var actual_damage = target.take_damage(damage_amount)
 
 		# Emit signal
 		damage_dealt.emit(enemy, target, actual_damage)
 
-		print("%s attacked %s for %d damage" % [enemy.name, target.champion_name, actual_damage])
+		print("%s attacked %s for %d damage" % [enemy.get("name", "Unknown"), target.champion_name, actual_damage])
 
 	# Check for deaths
 	_check_deaths()
@@ -478,8 +491,9 @@ func calculate_rewards() -> Dictionary:
 
 
 ## Get targets based on card target type and indices
-func _get_targets(card: Card, target_indices: Array) -> Array:
-	var targets = []
+## Returns Array[Variant] since targets can be Champion or Dictionary (enemy)
+func _get_targets(card: Card, target_indices: Array[int]) -> Array[Variant]:
+	var targets: Array[Variant] = []
 
 	match card.target_type:
 		"self":
@@ -491,12 +505,12 @@ func _get_targets(card: Card, target_indices: Array) -> Array:
 				return []
 			var enemy_index = target_indices[0]
 			if enemy_index >= 0 and enemy_index < enemies.size():
-				if not enemies[enemy_index].is_dead:
+				if not enemies[enemy_index].get("is_dead", false):
 					targets.append(enemies[enemy_index])
 
 		"all_enemies":
 			for enemy in enemies:
-				if not enemy.is_dead:
+				if not enemy.get("is_dead", false):
 					targets.append(enemy)
 
 		"single_ally":
@@ -602,10 +616,10 @@ func _check_deaths() -> void:
 
 	# Check enemy deaths
 	for enemy in enemies:
-		if enemy.current_hp <= 0 and not enemy.is_dead:
-			enemy.is_dead = true
+		if enemy.get("current_hp", 0) <= 0 and not enemy.get("is_dead", false):
+			enemy["is_dead"] = true
 			enemy_died.emit(enemy)
-			print("%s was defeated!" % enemy.name)
+			print("%s was defeated!" % enemy.get("name", "Unknown"))
 
 
 ## End battle with victory or defeat

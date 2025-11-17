@@ -50,14 +50,14 @@ extends Control
 @onready var battle_manager: BattleManager = $BattleManager
 
 # Node references - Champion displays (left side)
-@onready var champion_displays: Array = [
+@onready var champion_displays: Array[Node] = [
 	$Champions/ChampionDisplay1,
 	$Champions/ChampionDisplay2,
 	$Champions/ChampionDisplay3
 ]
 
 # Node references - Enemy displays (right side)
-@onready var enemy_displays: Array = [
+@onready var enemy_displays: Array[Node] = [
 	$Enemies/EnemyDisplay1,
 	$Enemies/EnemyDisplay2,
 	$Enemies/EnemyDisplay3
@@ -96,7 +96,7 @@ func _ready() -> void:
 	_connect_ui_signals()
 
 	# Initialize battle with enemies from GameManager
-	if game_manager and game_manager.has("current_battle_enemies"):
+	if game_manager and "current_battle_enemies" in game_manager:
 		var enemy_ids = game_manager.current_battle_enemies
 		if enemy_ids.is_empty():
 			push_warning("No enemies set in GameManager, using default test enemies")
@@ -350,7 +350,7 @@ func _update_gold_label() -> void:
 	if not game_manager or not gold_label:
 		return
 
-	if game_manager.has("player_gold"):
+	if "player_gold" in game_manager:
 		gold_label.text = "Gold: %d" % game_manager.player_gold
 
 

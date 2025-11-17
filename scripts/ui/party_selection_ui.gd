@@ -52,7 +52,7 @@ extends Control
 
 ## Emitted when party selection is confirmed and valid
 ## Parameters: champion_ids (Array[String]), deck_data (Dictionary[champion_id -> Array[card_ids]])
-signal party_confirmed(champion_ids: Array, deck_data: Dictionary)
+signal party_confirmed(champion_ids: Array[String], deck_data: Dictionary)
 
 
 # ============================================================================
@@ -60,7 +60,7 @@ signal party_confirmed(champion_ids: Array, deck_data: Dictionary)
 # ============================================================================
 
 # Unlocked champions (loaded from PartyManager)
-var unlocked_champions: Array = []
+var unlocked_champions: Array[String] = []
 
 # Currently selected champions (3 slots, empty string if unassigned)
 var selected_champions: Array[String] = ["", "", ""]
@@ -114,8 +114,10 @@ func _ready() -> void:
 	Loads unlocked champions from PartyManager and initializes UI.
 	"""
 	# Hide modal panels initially
-	champion_picker_panel.visible = false
-	deck_builder_panel.visible = false
+	if champion_picker_panel:
+		champion_picker_panel.visible = false
+	if deck_builder_panel:
+		deck_builder_panel.visible = false
 
 	# Load unlocked champions from PartyManager
 	load_unlocked_champions()
@@ -161,17 +163,19 @@ func initialize_champion_slots() -> void:
 	# Find champion slot panels (ChampionSlot1, ChampionSlot2, ChampionSlot3)
 	for i in range(3):
 		var slot_name = "ChampionSlot" + str(i + 1)
-		var slot_panel = champion_slots_container.get_node_or_null(slot_name)
+		var slot_panel = champion_slots_container.get_node_or_null(slot_name) as Panel
 
 		if slot_panel:
 			champion_slot_panels.append(slot_panel)
 
 			# Find the select button within the slot
-			var select_button = slot_panel.get_node_or_null("SelectButton")
+			var select_button = slot_panel.get_node_or_null("SelectButton") as Button
 			if select_button:
 				champion_slot_buttons.append(select_button)
 			else:
 				push_warning("SelectButton not found in " + slot_name)
+		else:
+			push_warning("Champion slot panel not found: " + slot_name)
 
 
 func connect_signals() -> void:
@@ -399,9 +403,15 @@ func _on_champion_selected(champion_id: String) -> void:
 	# Initialize deck data if not present
 	if not deck_data.has(champion_id):
 		# Use default selected cards from PartyManager
-		var champ_progress = PartyManager.get_champion_progress(champion_id)
-		var default_cards = champ_progress.get("selected_cards", [])
-		deck_data[champion_id] = default_cards.duplicate()
+		if PartyManager:
+			var champ_progress = PartyManager.get_champion_progress(champion_id)
+			if champ_progress:
+				var default_cards = champ_progress.get("selected_cards", [])
+				var typed_cards: Array[String] = []
+				for card_id in default_cards:
+					if card_id is String:
+						typed_cards.append(card_id)
+				deck_data[champion_id] = typed_cards
 
 	# Update slot display
 	update_champion_slot(current_editing_slot)
@@ -439,11 +449,17 @@ func open_deck_builder(champion_id: String, slot_index: int) -> void:
 	current_editing_champion = champion_id
 
 	# Load current deck selection into temp array
-	temp_selected_cards = deck_data.get(champion_id, []).duplicate()
+	temp_selected_cards.clear()
+	var existing_cards = deck_data.get(champion_id, [])
+	for card_id in existing_cards:
+		if card_id is String:
+			temp_selected_cards.append(card_id)
 
 	# Update deck builder title
-	var champ_data = CardDatabase.get_champion_data(champion_id)
-	deck_builder_title.text = "Build Deck for " + champ_data.get("name", champion_id)
+	if CardDatabase:
+		var champ_data = CardDatabase.get_champion_data(champion_id)
+		if deck_builder_title and champ_data:
+			deck_builder_title.text = "Build Deck for " + champ_data.get("name", champion_id)
 
 	# Populate card grid
 	populate_card_grid(champion_id)
@@ -452,7 +468,8 @@ func open_deck_builder(champion_id: String, slot_index: int) -> void:
 	update_selected_cards_label()
 
 	# Show deck builder panel
-	deck_builder_panel.visible = true
+	if deck_builder_panel:
+		deck_builder_panel.visible = true
 
 
 func populate_card_grid(champion_id: String) -> void:
@@ -462,12 +479,24 @@ func populate_card_grid(champion_id: String) -> void:
 	Args:
 		champion_id: ID of the champion
 	"""
+	if not card_grid_container:
+		push_error("Card grid container not found")
+		return
+
 	# Clear existing card buttons
 	for child in card_grid_container.get_children():
 		child.queue_free()
 
 	# Get unlocked cards for this champion
+	if not PartyManager:
+		push_error("PartyManager not found")
+		return
+
 	var champ_progress = PartyManager.get_champion_progress(champion_id)
+	if not champ_progress:
+		push_error("Champion progress not found for: " + champion_id)
+		return
+
 	var unlocked_cards = champ_progress.get("unlocked_cards", [])
 
 	# Create button for each unlocked card
@@ -552,9 +581,14 @@ func _on_close_deck_builder_pressed() -> void:
 	"""
 	# Only save if exactly 5 cards are selected
 	if temp_selected_cards.size() == 5:
-		deck_data[current_editing_champion] = temp_selected_cards.duplicate()
+		# Create a properly typed copy
+		var typed_cards: Array[String] = []
+		for card_id in temp_selected_cards:
+			typed_cards.append(card_id)
+		deck_data[current_editing_champion] = typed_cards
 		update_card_slots(current_editing_slot)
-		deck_builder_panel.visible = false
+		if deck_builder_panel:
+			deck_builder_panel.visible = false
 		current_editing_champion = ""
 		update_confirm_button_state()
 	else:

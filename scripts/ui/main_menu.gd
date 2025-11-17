@@ -133,7 +133,12 @@ func _apply_styling() -> void:
 
 func _check_save_status() -> void:
 	"""Check if a save file exists and enable/disable continue button"""
-	has_save_file = SaveManager.has_save()
+	# Check if SaveManager exists before using it
+	if not has_node("/root/SaveManager"):
+		push_warning("SaveManager not found, assuming no save file")
+		has_save_file = false
+	else:
+		has_save_file = SaveManager.has_save()
 
 	if continue_button:
 		continue_button.disabled = not has_save_file
@@ -188,6 +193,12 @@ func _on_continue_pressed() -> void:
 		push_error("No save file to load")
 		return
 
+	# Check if SaveManager exists
+	if not has_node("/root/SaveManager"):
+		push_error("SaveManager not found")
+		_show_error_dialog("Game systems not properly initialized.")
+		return
+
 	# Play button sound
 	_play_button_sound()
 
@@ -237,10 +248,13 @@ func _start_new_game() -> void:
 	print("Starting new game...")
 
 	# Reset game state
-	GameManager.reset_game()
+	if has_node("/root/GameManager"):
+		GameManager.reset_game()
+	else:
+		push_warning("GameManager not found, skipping reset")
 
 	# Delete existing save
-	if has_save_file:
+	if has_save_file and has_node("/root/SaveManager"):
 		SaveManager.delete_save()
 
 	# Emit signal
@@ -257,14 +271,11 @@ func _start_new_game() -> void:
 
 func _show_new_game_confirmation() -> void:
 	"""Show confirmation dialog when starting new game with existing save"""
-	var dialog := AcceptDialog.new()
+	var dialog := ConfirmationDialog.new()
 	dialog.dialog_text = "Starting a new game will overwrite your existing save. Continue?"
 	dialog.title = "Confirm New Game"
 	dialog.ok_button_text = "Start New Game"
 	dialog.cancel_button_text = "Cancel"
-
-	# Make it a confirmation dialog
-	dialog.add_cancel_button("Cancel")
 
 	add_child(dialog)
 	dialog.popup_centered()
