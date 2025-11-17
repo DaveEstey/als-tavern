@@ -105,8 +105,3 @@ size = Vector2i(400, 100)
 dialog_text = "Starting a new game will overwrite your current save. Continue?"
 ok_button_text = "Yes, Start New Game"
 
-[connection signal="pressed" from="VBoxContainer/NewGameButton" to="." method="_on_new_game_pressed"]
-[connection signal="pressed" from="VBoxContainer/ContinueButton" to="." method="_on_continue_pressed"]
-[connection signal="pressed" from="VBoxContainer/SettingsButton" to="." method="_on_settings_pressed"]
-[connection signal="pressed" from="VBoxContainer/QuitButton" to="." method="_on_quit_pressed"]
-[connection signal="confirmed" from="ConfirmDialog" to="." method="_on_confirm_new_game"]
