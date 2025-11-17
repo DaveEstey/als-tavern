@@ -1,0 +1,186 @@
+[gd_scene load_steps=7 format=3 uid="uid://c7a1jc6oqbnj8km7c"]
+
+[ext_resource type="Script" path="res://scripts/battle/battle_scene.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/battle/battle_manager.gd" id="2"]
+[ext_resource type="Script" path="res://scripts/ui/champion_display.gd" id="3"]
+[ext_resource type="Script" path="res://scripts/ui/enemy_display.gd" id="4"]
+[ext_resource type="Script" path="res://scripts/ui/hand_ui.gd" id="5"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_dark"]
+bg_color = Color(0.1, 0.1, 0.1, 1.0)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_button"]
+bg_color = Color(0.2, 0.4, 0.6, 1.0)
+
+[node name="BattleScene" type="Control"]
+layout_mode = 3
+anchors_left = 0.0
+anchors_top = 0.0
+anchors_right = 1.0
+anchors_bottom = 1.0
+script = ExtResource("1")
+
+[node name="Background" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_left = 0.0
+anchors_top = 0.0
+anchors_right = 1.0
+anchors_bottom = 1.0
+color = Color(0.1, 0.1, 0.15, 1.0)
+
+[node name="BattleManager" type="Node" parent="."]
+script = ExtResource("2")
+
+[node name="ChampionsContainer" type="VBoxContainer" parent="."]
+layout_mode = 1
+anchors_left = 0.0
+anchors_top = 0.1
+anchors_right = 0.2
+anchors_bottom = 0.9
+offset_left = 10.0
+offset_right = -10.0
+separation = 10
+
+[node name="ChampionDisplay1" type="Control" parent="ChampionsContainer"]
+custom_minimum_size = Vector2(150, 150)
+layout_mode = 2
+script = ExtResource("3")
+
+[node name="ChampionDisplay2" type="Control" parent="ChampionsContainer"]
+custom_minimum_size = Vector2(150, 150)
+layout_mode = 2
+script = ExtResource("3")
+
+[node name="ChampionDisplay3" type="Control" parent="ChampionsContainer"]
+custom_minimum_size = Vector2(150, 150)
+layout_mode = 2
+script = ExtResource("3")
+
+[node name="EnemiesContainer" type="HBoxContainer" parent="."]
+layout_mode = 1
+anchors_left = 0.8
+anchors_top = 0.1
+anchors_right = 1.0
+anchors_bottom = 0.9
+offset_left = 10.0
+offset_right = -10.0
+separation = 10
+
+[node name="EnemyDisplay1" type="Control" parent="EnemiesContainer"]
+custom_minimum_size = Vector2(120, 200)
+layout_mode = 2
+script = ExtResource("4")
+
+[node name="EnemyDisplay2" type="Control" parent="EnemiesContainer"]
+custom_minimum_size = Vector2(120, 200)
+layout_mode = 2
+script = ExtResource("4")
+
+[node name="EnemyDisplay3" type="Control" parent="EnemiesContainer"]
+custom_minimum_size = Vector2(120, 200)
+layout_mode = 2
+script = ExtResource("4")
+
+[node name="Hand" type="Control" parent="."]
+layout_mode = 1
+anchors_left = 0.25
+anchors_top = 0.85
+anchors_right = 0.75
+anchors_bottom = 1.0
+offset_top = -100.0
+script = ExtResource("5")
+
+[node name="CardsContainer" type="HBoxContainer" parent="Hand"]
+layout_mode = 1
+anchors_left = 0.0
+anchors_top = 0.0
+anchors_right = 1.0
+anchors_bottom = 1.0
+separation = 8
+
+[node name="PhaseLabel" type="Label" parent="."]
+layout_mode = 1
+anchors_left = 0.5
+anchors_top = 0.02
+anchors_right = 0.5
+anchors_bottom = 0.08
+offset_left = -100.0
+offset_right = 100.0
+text = "Phase: Planning"
+horizontal_alignment = 1
+vertical_alignment = 1
+theme_override_font_sizes/font_size = 24
+
+[node name="ActionsLabel" type="Label" parent="."]
+layout_mode = 1
+anchors_left = 0.2
+anchors_top = 0.02
+anchors_right = 0.4
+anchors_bottom = 0.08
+text = "Actions: 3"
+theme_override_font_sizes/font_size = 14
+
+[node name="GoldLabel" type="Label" parent="."]
+layout_mode = 1
+anchors_left = 0.2
+anchors_top = 0.09
+anchors_right = 0.4
+anchors_bottom = 0.15
+text = "Gold: 0"
+theme_override_font_sizes/font_size = 14
+
+[node name="DeckCountLabel" type="Label" parent="."]
+layout_mode = 1
+anchors_left = 0.02
+anchors_top = 0.02
+anchors_right = 0.15
+anchors_bottom = 0.08
+text = "Deck: 20"
+theme_override_font_sizes/font_size = 12
+
+[node name="DiscardCountLabel" type="Label" parent="."]
+layout_mode = 1
+anchors_left = 0.02
+anchors_top = 0.09
+anchors_right = 0.15
+anchors_bottom = 0.15
+text = "Discard: 0"
+theme_override_font_sizes/font_size = 12
+
+[node name="EndTurnButton" type="Button" parent="."]
+layout_mode = 1
+anchors_left = 0.85
+anchors_top = 0.92
+anchors_right = 0.98
+anchors_bottom = 0.98
+text = "End Turn"
+theme_override_styles/normal = SubResource("StyleBoxFlat_button")
+
+[node name="VictoryDefeatScreen" type="Panel" parent="."]
+visible = false
+layout_mode = 1
+anchors_left = 0.2
+anchors_top = 0.2
+anchors_right = 0.8
+anchors_bottom = 0.8
+theme_override_styles/panel = SubResource("StyleBoxFlat_dark")
+
+[node name="VictoryDefeatLabel" type="Label" parent="VictoryDefeatScreen"]
+layout_mode = 1
+anchors_left = 0.0
+anchors_top = 0.3
+anchors_right = 1.0
+anchors_bottom = 0.5
+text = "Victory!"
+horizontal_alignment = 1
+vertical_alignment = 1
+theme_override_font_sizes/font_size = 48
+
+[node name="ContinueButton" type="Button" parent="VictoryDefeatScreen"]
+layout_mode = 1
+anchors_left = 0.3
+anchors_top = 0.6
+anchors_right = 0.7
+anchors_bottom = 0.75
+text = "Continue"
+theme_override_styles/normal = SubResource("StyleBoxFlat_button")
