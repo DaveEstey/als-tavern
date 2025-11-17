@@ -1,0 +1,225 @@
+{
+  "goblin_scout": {
+    "id": "goblin_scout",
+    "name": "Goblin Scout",
+    "type": "trash",
+    "hp": 15,
+    "damage": 5,
+    "defense": 2,
+    "xp_reward": 10,
+    "gold_reward": 5,
+    "attacks": [
+      {
+        "name": "Stab",
+        "type": "damage",
+        "value": 5,
+        "target": "random"
+      }
+    ]
+  },
+  "wolf": {
+    "id": "wolf",
+    "name": "Wolf",
+    "type": "trash",
+    "hp": 20,
+    "damage": 6,
+    "defense": 3,
+    "xp_reward": 12,
+    "gold_reward": 6,
+    "attacks": [
+      {
+        "name": "Bite",
+        "type": "damage",
+        "value": 6,
+        "target": "random"
+      },
+      {
+        "name": "Howl",
+        "type": "buff_self",
+        "buff_type": "damage",
+        "value": 3,
+        "target": "self"
+      }
+    ]
+  },
+  "bandit": {
+    "id": "bandit",
+    "name": "Bandit",
+    "type": "trash",
+    "hp": 18,
+    "damage": 7,
+    "defense": 4,
+    "xp_reward": 11,
+    "gold_reward": 8,
+    "attacks": [
+      {
+        "name": "Slash",
+        "type": "damage",
+        "value": 7,
+        "target": "random"
+      }
+    ]
+  },
+  "skeleton_warrior": {
+    "id": "skeleton_warrior",
+    "name": "Skeleton Warrior",
+    "type": "trash",
+    "hp": 22,
+    "damage": 6,
+    "defense": 5,
+    "xp_reward": 13,
+    "gold_reward": 7,
+    "attacks": [
+      {
+        "name": "Bone Strike",
+        "type": "damage",
+        "value": 6,
+        "target": "random"
+      },
+      {
+        "name": "Shield Block",
+        "type": "block",
+        "value": 8,
+        "target": "self"
+      }
+    ]
+  },
+  "dark_mage": {
+    "id": "dark_mage",
+    "name": "Dark Mage",
+    "type": "trash",
+    "hp": 12,
+    "damage": 8,
+    "defense": 2,
+    "xp_reward": 15,
+    "gold_reward": 10,
+    "attacks": [
+      {
+        "name": "Fireball",
+        "type": "damage",
+        "value": 8,
+        "target": "random"
+      },
+      {
+        "name": "Drain",
+        "type": "damage_and_heal",
+        "damage_value": 5,
+        "heal_value": 5,
+        "target": "random"
+      }
+    ]
+  },
+  "orc_grunt": {
+    "id": "orc_grunt",
+    "name": "Orc Grunt",
+    "type": "trash",
+    "hp": 25,
+    "damage": 9,
+    "defense": 6,
+    "xp_reward": 14,
+    "gold_reward": 9,
+    "attacks": [
+      {
+        "name": "Smash",
+        "type": "damage",
+        "value": 9,
+        "target": "random"
+      }
+    ]
+  },
+  "venomous_spider": {
+    "id": "venomous_spider",
+    "name": "Venomous Spider",
+    "type": "trash",
+    "hp": 10,
+    "damage": 3,
+    "defense": 1,
+    "xp_reward": 12,
+    "gold_reward": 6,
+    "attacks": [
+      {
+        "name": "Poison Bite",
+        "type": "damage_and_poison",
+        "damage_value": 3,
+        "poison_value": 2,
+        "duration": 3,
+        "target": "random"
+      }
+    ]
+  },
+  "orc_warlord": {
+    "id": "orc_warlord",
+    "name": "Orc Warlord",
+    "type": "elite",
+    "hp": 50,
+    "damage": 12,
+    "defense": 8,
+    "xp_reward": 40,
+    "gold_reward": 30,
+    "attacks": [
+      {
+        "name": "Brutal Swing",
+        "type": "damage",
+        "value": 12,
+        "target": "random"
+      },
+      {
+        "name": "War Cry",
+        "type": "aoe_damage",
+        "value": 8,
+        "target": "all"
+      },
+      {
+        "name": "Enrage",
+        "type": "buff_self",
+        "buff_type": "damage",
+        "value": 5,
+        "target": "self"
+      }
+    ]
+  },
+  "lich": {
+    "id": "lich",
+    "name": "Lich",
+    "type": "elite",
+    "hp": 40,
+    "damage": 10,
+    "defense": 6,
+    "xp_reward": 45,
+    "gold_reward": 35,
+    "attacks": [
+      {
+        "name": "Shadow Bolt",
+        "type": "damage",
+        "value": 10,
+        "target": "random"
+      },
+      {
+        "name": "Life Drain",
+        "type": "damage_and_heal",
+        "damage_value": 8,
+        "heal_value": 8,
+        "target": "random"
+      }
+    ]
+  },
+  "fire_knight": {
+    "id": "fire_knight",
+    "name": "Fire Knight",
+    "type": "boss",
+    "hp": 100,
+    "damage": 15,
+    "defense": 10,
+    "xp_reward": 100,
+    "gold_reward": 100,
+    "unlocks_champion": "fire_knight",
+    "uses_cards": true,
+    "card_deck": [
+      "flame_strike",
+      "fire_wave",
+      "burning_armor",
+      "ignite",
+      "inferno"
+    ]
+  }
+}
