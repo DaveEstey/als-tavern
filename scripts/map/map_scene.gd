@@ -125,7 +125,7 @@ func generate_and_display_map() -> void:
 
 	# Generate map structure
 	if map_generator and map_generator.has_method("generate_map"):
-		current_map = map_generator.generate_map(current_floor)
+		current_map = map_generator.generate_map()
 	else:
 		# Fallback: create a simple test map if generator not available
 		push_warning("MapGenerator not found or missing generate_map method, using test map")
@@ -515,7 +515,7 @@ func _open_treasure() -> void:
 
 
 ## Trigger a random event
-func _trigger_random_event(node: Dictionary) -> void:
+func _trigger_random_event(_node: Dictionary) -> void:
 	print("MapScene: Random event triggered")
 
 	var events = [
