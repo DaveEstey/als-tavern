@@ -1,0 +1,299 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/party_selection_ui.gd"]
+
+[node name="PartySelection" type="Control"]
+layout_mode = 3
+anchors_left = 0.0
+anchors_top = 0.0
+anchors_right = 1.0
+anchors_bottom = 1.0
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 0.0
+offset_bottom = 0.0
+script = ExtResource("1")
+
+[node name="Background" type="ColorRect" parent="PartySelection"]
+layout_mode = 1
+anchors_left = 0.0
+anchors_top = 0.0
+anchors_right = 1.0
+anchors_bottom = 1.0
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 0.0
+offset_bottom = 0.0
+color = Color(0.2, 0.2, 0.3, 1.0)
+
+[node name="MainContainer" type="VBoxContainer" parent="PartySelection"]
+layout_mode = 1
+anchors_left = 0.5
+anchors_top = 0.5
+anchors_right = 0.5
+anchors_bottom = 0.5
+offset_left = -400.0
+offset_top = -300.0
+offset_right = 400.0
+offset_bottom = 300.0
+alignment = 1
+
+[node name="Title" type="Label" parent="PartySelection/MainContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 48
+text = "SELECT YOUR PARTY"
+horizontal_alignment = 1
+
+[node name="SlotsContainer" type="HBoxContainer" parent="PartySelection/MainContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+alignment = 1
+
+[node name="ChampionSlot1" type="Panel" parent="PartySelection/MainContainer/SlotsContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_styles/panel = SubResource("PanelStyleBox")
+
+[node name="SlotLayout1" type="VBoxContainer" parent="PartySelection/MainContainer/SlotsContainer/ChampionSlot1"]
+layout_mode = 1
+anchors_left = 0.0
+anchors_top = 0.0
+anchors_right = 1.0
+anchors_bottom = 1.0
+offset_left = 10.0
+offset_top = 10.0
+offset_right = -10.0
+offset_bottom = -10.0
+
+[node name="Portrait1" type="ColorRect" parent="PartySelection/MainContainer/SlotsContainer/ChampionSlot1/SlotLayout1"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+color = Color(0.3, 0.3, 0.4, 1.0)
+
+[node name="NameLabel1" type="Label" parent="PartySelection/MainContainer/SlotsContainer/ChampionSlot1/SlotLayout1"]
+layout_mode = 2
+text = "Champion Name"
+horizontal_alignment = 1
+
+[node name="StatsLabel1" type="Label" parent="PartySelection/MainContainer/SlotsContainer/ChampionSlot1/SlotLayout1"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+text = "HP: -- ATK: -- DEF: --"
+horizontal_alignment = 1
+
+[node name="ChampionSlot2" type="Panel" parent="PartySelection/MainContainer/SlotsContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_styles/panel = SubResource("PanelStyleBox")
+
+[node name="SlotLayout2" type="VBoxContainer" parent="PartySelection/MainContainer/SlotsContainer/ChampionSlot2"]
+layout_mode = 1
+anchors_left = 0.0
+anchors_top = 0.0
+anchors_right = 1.0
+anchors_bottom = 1.0
+offset_left = 10.0
+offset_top = 10.0
+offset_right = -10.0
+offset_bottom = -10.0
+
+[node name="Portrait2" type="ColorRect" parent="PartySelection/MainContainer/SlotsContainer/ChampionSlot2/SlotLayout2"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+color = Color(0.3, 0.3, 0.4, 1.0)
+
+[node name="NameLabel2" type="Label" parent="PartySelection/MainContainer/SlotsContainer/ChampionSlot2/SlotLayout2"]
+layout_mode = 2
+text = "Champion Name"
+horizontal_alignment = 1
+
+[node name="StatsLabel2" type="Label" parent="PartySelection/MainContainer/SlotsContainer/ChampionSlot2/SlotLayout2"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+text = "HP: -- ATK: -- DEF: --"
+horizontal_alignment = 1
+
+[node name="ChampionSlot3" type="Panel" parent="PartySelection/MainContainer/SlotsContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_styles/panel = SubResource("PanelStyleBox")
+
+[node name="SlotLayout3" type="VBoxContainer" parent="PartySelection/MainContainer/SlotsContainer/ChampionSlot3"]
+layout_mode = 1
+anchors_left = 0.0
+anchors_top = 0.0
+anchors_right = 1.0
+anchors_bottom = 1.0
+offset_left = 10.0
+offset_top = 10.0
+offset_right = -10.0
+offset_bottom = -10.0
+
+[node name="Portrait3" type="ColorRect" parent="PartySelection/MainContainer/SlotsContainer/ChampionSlot3/SlotLayout3"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+color = Color(0.3, 0.3, 0.4, 1.0)
+
+[node name="NameLabel3" type="Label" parent="PartySelection/MainContainer/SlotsContainer/ChampionSlot3/SlotLayout3"]
+layout_mode = 2
+text = "Champion Name"
+horizontal_alignment = 1
+
+[node name="StatsLabel3" type="Label" parent="PartySelection/MainContainer/SlotsContainer/ChampionSlot3/SlotLayout3"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+text = "HP: -- ATK: -- DEF: --"
+horizontal_alignment = 1
+
+[node name="ButtonContainer" type="HBoxContainer" parent="PartySelection/MainContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+alignment = 1
+
+[node name="BackButton" type="Button" parent="PartySelection/MainContainer/ButtonContainer"]
+layout_mode = 2
+text = "Back"
+
+[node name="ConfirmButton" type="Button" parent="PartySelection/MainContainer/ButtonContainer"]
+layout_mode = 2
+text = "Confirm"
+
+[node name="ChampionPickerPanel" type="Panel" parent="PartySelection"]
+layout_mode = 1
+anchors_left = 0.1
+anchors_top = 0.1
+anchors_right = 0.9
+anchors_bottom = 0.9
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 0.0
+offset_bottom = 0.0
+visible = false
+
+[node name="ChampionPickerLayout" type="VBoxContainer" parent="PartySelection/ChampionPickerPanel"]
+layout_mode = 1
+anchors_left = 0.0
+anchors_top = 0.0
+anchors_right = 1.0
+anchors_bottom = 1.0
+offset_left = 10.0
+offset_top = 10.0
+offset_right = -10.0
+offset_bottom = -10.0
+
+[node name="PickerTitle" type="Label" parent="PartySelection/ChampionPickerPanel/ChampionPickerLayout"]
+layout_mode = 2
+text = "Select a Champion"
+horizontal_alignment = 1
+
+[node name="PickerScrollContainer" type="ScrollContainer" parent="PartySelection/ChampionPickerPanel/ChampionPickerLayout"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="PickerList" type="VBoxContainer" parent="PartySelection/ChampionPickerPanel/ChampionPickerLayout/PickerScrollContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="PickerButtonContainer" type="HBoxContainer" parent="PartySelection/ChampionPickerPanel/ChampionPickerLayout"]
+layout_mode = 2
+alignment = 1
+
+[node name="CancelPickerButton" type="Button" parent="PartySelection/ChampionPickerPanel/ChampionPickerLayout/PickerButtonContainer"]
+layout_mode = 2
+text = "Cancel"
+
+[node name="DeckBuilderPanel" type="Panel" parent="PartySelection"]
+layout_mode = 1
+anchors_left = 0.05
+anchors_top = 0.05
+anchors_right = 0.95
+anchors_bottom = 0.95
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 0.0
+offset_bottom = 0.0
+visible = false
+
+[node name="DeckBuilderLayout" type="VBoxContainer" parent="PartySelection/DeckBuilderPanel"]
+layout_mode = 1
+anchors_left = 0.0
+anchors_top = 0.0
+anchors_right = 1.0
+anchors_bottom = 1.0
+offset_left = 15.0
+offset_top = 15.0
+offset_right = -15.0
+offset_bottom = -15.0
+
+[node name="DeckTitle" type="Label" parent="PartySelection/DeckBuilderPanel/DeckBuilderLayout"]
+layout_mode = 2
+text = "Build Deck"
+horizontal_alignment = 1
+
+[node name="DeckContent" type="HSplitContainer" parent="PartySelection/DeckBuilderPanel/DeckBuilderLayout"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="AvailableCardsContainer" type="VBoxContainer" parent="PartySelection/DeckBuilderPanel/DeckBuilderLayout/DeckContent"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="AvailableCardsLabel" type="Label" parent="PartySelection/DeckBuilderPanel/DeckBuilderLayout/DeckContent/AvailableCardsContainer"]
+layout_mode = 2
+text = "Available Cards"
+
+[node name="AvailableCardsScroll" type="ScrollContainer" parent="PartySelection/DeckBuilderPanel/DeckBuilderLayout/DeckContent/AvailableCardsContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="AvailableCardsList" type="VBoxContainer" parent="PartySelection/DeckBuilderPanel/DeckBuilderLayout/DeckContent/AvailableCardsContainer/AvailableCardsScroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="CurrentDeckContainer" type="VBoxContainer" parent="PartySelection/DeckBuilderPanel/DeckBuilderLayout/DeckContent"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="CurrentDeckLabel" type="Label" parent="PartySelection/DeckBuilderPanel/DeckBuilderLayout/DeckContent/CurrentDeckContainer"]
+layout_mode = 2
+text = "Current Deck"
+
+[node name="CurrentDeckScroll" type="ScrollContainer" parent="PartySelection/DeckBuilderPanel/DeckBuilderLayout/DeckContent/CurrentDeckContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="CurrentDeckList" type="VBoxContainer" parent="PartySelection/DeckBuilderPanel/DeckBuilderLayout/DeckContent/CurrentDeckContainer/CurrentDeckScroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="DeckBuilderButtonContainer" type="HBoxContainer" parent="PartySelection/DeckBuilderPanel/DeckBuilderLayout"]
+layout_mode = 2
+alignment = 1
+
+[node name="SaveDeckButton" type="Button" parent="PartySelection/DeckBuilderPanel/DeckBuilderLayout/DeckBuilderButtonContainer"]
+layout_mode = 2
+text = "Save Deck"
+
+[node name="CloseDeckBuilderButton" type="Button" parent="PartySelection/DeckBuilderPanel/DeckBuilderLayout/DeckBuilderButtonContainer"]
+layout_mode = 2
+text = "Close"
+
+[sub_resource type="PanelStyleBox" id="PanelStyleBox"]
+bg_color = Color(0.25, 0.25, 0.35, 1.0)
+border_color = Color(0.5, 0.5, 0.6, 1.0)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_blend = true
+corner_radius_top_left = 5
+corner_radius_top_right = 5
+corner_radius_bottom_right = 5
+corner_radius_bottom_left = 5
