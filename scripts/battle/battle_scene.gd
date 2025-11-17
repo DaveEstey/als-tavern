@@ -51,32 +51,32 @@ extends Control
 
 # Node references - Champion displays (left side)
 @onready var champion_displays: Array[Node] = [
-	$Champions/ChampionDisplay1,
-	$Champions/ChampionDisplay2,
-	$Champions/ChampionDisplay3
+	$ChampionsContainer/ChampionDisplay1,
+	$ChampionsContainer/ChampionDisplay2,
+	$ChampionsContainer/ChampionDisplay3
 ]
 
 # Node references - Enemy displays (right side)
 @onready var enemy_displays: Array[Node] = [
-	$Enemies/EnemyDisplay1,
-	$Enemies/EnemyDisplay2,
-	$Enemies/EnemyDisplay3
+	$EnemiesContainer/EnemyDisplay1,
+	$EnemiesContainer/EnemyDisplay2,
+	$EnemiesContainer/EnemyDisplay3
 ]
 
 # Node references - Hand and deck UI
 @onready var hand_ui: Control = $Hand
-@onready var deck_count_label: Label = $UIElements/DeckCount
-@onready var discard_count_label: Label = $UIElements/DiscardCount
-@onready var gold_label: Label = $UIElements/GoldLabel
-@onready var phase_label: Label = $UIElements/PhaseLabel
-@onready var actions_label: Label = $UIElements/ActionsLabel
-@onready var end_turn_button: Button = $UIElements/EndTurnButton
+@onready var deck_count_label: Label = $DeckCountLabel
+@onready var discard_count_label: Label = $DiscardCountLabel
+@onready var gold_label: Label = $GoldLabel
+@onready var phase_label: Label = $PhaseLabel
+@onready var actions_label: Label = $ActionsLabel
+@onready var end_turn_button: Button = $EndTurnButton
 
 # Node references - Victory/Defeat screen
 @onready var victory_defeat_screen: Control = $VictoryDefeatScreen
-@onready var result_label: Label = $VictoryDefeatScreen/Panel/VBoxContainer/ResultLabel
-@onready var rewards_label: Label = $VictoryDefeatScreen/Panel/VBoxContainer/RewardsLabel
-@onready var continue_button: Button = $VictoryDefeatScreen/Panel/VBoxContainer/ContinueButton
+@onready var result_label: Label = $VictoryDefeatScreen/VictoryDefeatLabel
+@onready var rewards_label: Label = $VictoryDefeatScreen/RewardsLabel
+@onready var continue_button: Button = $VictoryDefeatScreen/ContinueButton
 
 # Manager references
 var game_manager: Node

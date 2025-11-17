@@ -1,9 +1,9 @@
-[gd_scene load_steps=7 format=3 uid="uid://c7a1jc6oqbnj8km7c"]
+[gd_scene load_steps=8 format=3 uid="uid://c7a1jc6oqbnj8km7c"]
 
 [ext_resource type="Script" path="res://scripts/battle/battle_scene.gd" id="1"]
 [ext_resource type="Script" path="res://scripts/battle/battle_manager.gd" id="2"]
-[ext_resource type="Script" path="res://scripts/ui/champion_display.gd" id="3"]
-[ext_resource type="Script" path="res://scripts/ui/enemy_display.gd" id="4"]
+[ext_resource type="PackedScene" uid="uid://cjqv8h3x5y9wk" path="res://scenes/ui/champion_display.tscn" id="3"]
+[ext_resource type="PackedScene" uid="uid://dxevqgqy5gm2r" path="res://scenes/ui/enemy_display.tscn" id="4"]
 [ext_resource type="Script" path="res://scripts/ui/hand_ui.gd" id="5"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_dark"]
@@ -41,20 +41,17 @@ offset_left = 10.0
 offset_right = -10.0
 separation = 10
 
-[node name="ChampionDisplay1" type="Control" parent="ChampionsContainer"]
+[node name="ChampionDisplay1" parent="ChampionsContainer" instance=ExtResource("3")]
 custom_minimum_size = Vector2(150, 150)
 layout_mode = 2
-script = ExtResource("3")
 
-[node name="ChampionDisplay2" type="Control" parent="ChampionsContainer"]
+[node name="ChampionDisplay2" parent="ChampionsContainer" instance=ExtResource("3")]
 custom_minimum_size = Vector2(150, 150)
 layout_mode = 2
-script = ExtResource("3")
 
-[node name="ChampionDisplay3" type="Control" parent="ChampionsContainer"]
+[node name="ChampionDisplay3" parent="ChampionsContainer" instance=ExtResource("3")]
 custom_minimum_size = Vector2(150, 150)
 layout_mode = 2
-script = ExtResource("3")
 
 [node name="EnemiesContainer" type="HBoxContainer" parent="."]
 layout_mode = 1
@@ -66,20 +63,17 @@ offset_left = 10.0
 offset_right = -10.0
 separation = 10
 
-[node name="EnemyDisplay1" type="Control" parent="EnemiesContainer"]
+[node name="EnemyDisplay1" parent="EnemiesContainer" instance=ExtResource("4")]
 custom_minimum_size = Vector2(120, 200)
 layout_mode = 2
-script = ExtResource("4")
 
-[node name="EnemyDisplay2" type="Control" parent="EnemiesContainer"]
+[node name="EnemyDisplay2" parent="EnemiesContainer" instance=ExtResource("4")]
 custom_minimum_size = Vector2(120, 200)
 layout_mode = 2
-script = ExtResource("4")
 
-[node name="EnemyDisplay3" type="Control" parent="EnemiesContainer"]
+[node name="EnemyDisplay3" parent="EnemiesContainer" instance=ExtResource("4")]
 custom_minimum_size = Vector2(120, 200)
 layout_mode = 2
-script = ExtResource("4")
 
 [node name="Hand" type="Control" parent="."]
 layout_mode = 1
@@ -168,19 +162,31 @@ theme_override_styles/panel = SubResource("StyleBoxFlat_dark")
 [node name="VictoryDefeatLabel" type="Label" parent="VictoryDefeatScreen"]
 layout_mode = 1
 anchors_left = 0.0
-anchors_top = 0.3
+anchors_top = 0.2
 anchors_right = 1.0
-anchors_bottom = 0.5
+anchors_bottom = 0.35
 text = "Victory!"
 horizontal_alignment = 1
 vertical_alignment = 1
 theme_override_font_sizes/font_size = 48
 
+[node name="RewardsLabel" type="Label" parent="VictoryDefeatScreen"]
+layout_mode = 1
+anchors_left = 0.1
+anchors_top = 0.35
+anchors_right = 0.9
+anchors_bottom = 0.6
+text = "Rewards"
+horizontal_alignment = 1
+vertical_alignment = 0
+autowrap_mode = 2
+theme_override_font_sizes/font_size = 16
+
 [node name="ContinueButton" type="Button" parent="VictoryDefeatScreen"]
 layout_mode = 1
 anchors_left = 0.3
-anchors_top = 0.6
+anchors_top = 0.7
 anchors_right = 0.7
-anchors_bottom = 0.75
+anchors_bottom = 0.85
 text = "Continue"
 theme_override_styles/normal = SubResource("StyleBoxFlat_button")

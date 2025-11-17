@@ -33,12 +33,14 @@ signal battle_ended(victory: bool)
 
 func _ready() -> void:
 	# Get references to autoload managers
-	card_database = get_tree().root.get_child(0).get_node_or_null("CardDatabase")
-	party_manager = get_tree().root.get_child(0).get_node_or_null("PartyManager")
-
-	if not card_database:
+	if has_node("/root/CardDatabase"):
+		card_database = get_node("/root/CardDatabase")
+	else:
 		push_error("CardDatabase not found. Make sure it's set up as an autoload.")
-	if not party_manager:
+
+	if has_node("/root/PartyManager"):
+		party_manager = get_node("/root/PartyManager")
+	else:
 		push_error("PartyManager not found. Make sure it's set up as an autoload.")
 
 
