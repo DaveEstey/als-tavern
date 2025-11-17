@@ -49,7 +49,7 @@ signal map_completed()
 @onready var map_container: Control = $MapContainer
 @onready var node_grid: Control = $MapContainer/NodeGrid
 @onready var player_marker: Control = $PlayerMarker
-@onready var path_lines: Control = $PathLines
+@onready var path_lines: Control = $MapContainer/PathLines
 
 # Node references - UI elements
 @onready var gold_label: Label = $UIElements/GoldLabel
@@ -83,8 +83,9 @@ const PATH_WIDTH: float = 3.0
 
 func _ready() -> void:
 	# Get reference to GameManager (autoload)
-	game_manager = get_tree().root.get_child(0).get_node_or_null("GameManager")
-	if not game_manager:
+	if has_node("/root/GameManager"):
+		game_manager = get_node("/root/GameManager")
+	else:
 		push_error("GameManager not found. Make sure it's set up as an autoload.")
 		return
 

@@ -67,7 +67,7 @@ func _generate_node_grid() -> void:
 		var column_spacing: float = float(map_width - 1) / float(nodes_in_row - 1) if nodes_in_row > 1 else 0.0
 
 		for i in range(nodes_in_row):
-			var column: int = int(i * column_spacing) if nodes_in_row > 1 else map_width / 2
+			var column: int = int(i * column_spacing) if nodes_in_row > 1 else map_width // 2
 			# Add some randomness to column position
 			if nodes_in_row > 1 and row > 1:
 				column = clampi(column + randi_range(-1, 1), 0, map_width - 1)
@@ -110,7 +110,7 @@ func _generate_paths() -> void:
 
 		# Each node connects to 1-3 nodes in the next row
 		for node in current_row:
-			var connections_made: int = 0
+			var _connections_made: int = 0  # Prefixed with _ to indicate intentionally unused
 			var target_connections: int = randi_range(1, min(3, next_row.size()))
 
 			# Find closest nodes in next row
@@ -126,7 +126,7 @@ func _generate_paths() -> void:
 				var target_node: Dictionary = next_nodes_by_distance[i]
 				if not node["connections"].has(target_node["id"]):
 					node["connections"].append(target_node["id"])
-					connections_made += 1
+					_connections_made += 1
 
 		# Ensure all nodes in next row have at least one incoming connection
 		for next_node in next_row:
@@ -176,7 +176,7 @@ func _place_special_nodes() -> void:
 	var placement_index: int = 0
 
 	# Place rest nodes (evenly distributed)
-	var rest_spacing: int = max(1, middle_nodes.size() / (num_rest + 1))
+	var rest_spacing: int = max(1, middle_nodes.size() // (num_rest + 1))
 	for i in range(num_rest):
 		if placement_index < middle_nodes.size():
 			var node_idx: int = middle_nodes[min(placement_index, middle_nodes.size() - 1)]
@@ -184,8 +184,8 @@ func _place_special_nodes() -> void:
 			placement_index += rest_spacing
 
 	# Place shop nodes (evenly distributed, offset from rest)
-	placement_index = rest_spacing / 2
-	var shop_spacing: int = max(1, middle_nodes.size() / (num_shop + 1))
+	placement_index = rest_spacing // 2
+	var shop_spacing: int = max(1, middle_nodes.size() // (num_shop + 1))
 	for i in range(num_shop):
 		if placement_index < middle_nodes.size():
 			var node_idx: int = middle_nodes[min(placement_index, middle_nodes.size() - 1)]
