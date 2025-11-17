@@ -109,8 +109,8 @@ func can_be_played() -> bool:
 	return target_type in valid_targets
 
 
-func get_tooltip() -> String:
-	## Return formatted tooltip with description and values
+func get_card_description() -> String:
+	## Return formatted card description with values (renamed to avoid conflict with Control.get_tooltip)
 	var tooltip: String = ""
 
 	# Card name and type
