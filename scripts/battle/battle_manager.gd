@@ -118,8 +118,8 @@ func _load_champions() -> void:
 
 	for champ_id in party_ids:
 		var champion = Champion.new()
+		add_child(champion)  # Add to scene tree BEFORE initializing
 		champion.initialize(champ_id)
-		add_child(champion)  # Add to scene tree
 		champions.append(champion)
 
 

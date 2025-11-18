@@ -104,11 +104,11 @@ func _gui_input(event: InputEvent) -> void:
 			if event.pressed:
 				# Start dragging
 				_start_drag()
-				get_tree().set_input_as_handled()
+				get_viewport().set_input_as_handled()
 			else:
 				# Release drag
 				_end_drag()
-				get_tree().set_input_as_handled()
+				get_viewport().set_input_as_handled()
 
 
 func _process(delta: float) -> void:
