@@ -252,25 +252,33 @@ func _arrange_cards() -> void:
 	if card_count == 0:
 		return
 
-	# Get hand center position
-	var hand_center_x = size.x / 2.0
-	var hand_center_y = size.y / 2.0
+	# Wait for Hand to be properly sized by layout system
+	# Use get_rect() which is more reliable than size property during initialization
+	await get_tree().process_frame
 
-	# Debug: Check if size is valid
-	if size.x == 0 or size.y == 0:
-		print("HandUI: Warning - Hand size is zero! Deferring arrangement...")
-		# Defer the arrangement until next frame when size should be set
-		call_deferred("_arrange_cards")
-		return
+	# Get hand dimensions - use get_rect() to ensure we have correct size
+	var hand_rect = get_rect()
+	var hand_width = hand_rect.size.x
+	var hand_height = hand_rect.size.y
 
-	print("HandUI: Arranging %d cards in hand (size: %v)" % [card_count, size])
+	# If still zero, use the offset-based dimensions as fallback
+	if hand_width == 0 or hand_height == 0:
+		print("HandUI: Warning - Hand size still zero, using fallback dimensions")
+		# From battle_scene.tscn: offset_right (1040) - offset_left (240) = 800
+		hand_width = 800.0
+		hand_height = 180.0
+
+	print("HandUI: Arranging %d cards in hand (size: %.0fx%.0f)" % [card_count, hand_width, hand_height])
+
+	var hand_center_x = hand_width / 2.0
+	var hand_center_y = hand_height / 2.0
 
 	# Calculate spacing (limit to max_card_spacing)
 	var spacing = min(card_spacing, max_card_spacing)
 	if card_count > 1:
 		# Adjust spacing based on available width
 		var total_width_needed = (card_count - 1) * card_spacing
-		var available_width = size.x - 140  # Leave margins (card width is ~120)
+		var available_width = hand_width - 140  # Leave margins (card width is ~120)
 		if total_width_needed > available_width:
 			spacing = available_width / (card_count - 1)
 
