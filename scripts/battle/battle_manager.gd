@@ -91,6 +91,7 @@ func _load_enemies(enemy_ids: Array[String]) -> void:
 		var enemy = {
 			"id": enemy_id,
 			"name": enemy_data.get("name", "Unknown Enemy"),
+			"type": enemy_data.get("type", "trash"),
 			"max_hp": enemy_data.get("hp", 50),
 			"current_hp": enemy_data.get("hp", 50),
 			"damage": enemy_data.get("damage", 10),

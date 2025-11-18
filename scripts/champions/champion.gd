@@ -23,8 +23,9 @@ var party_manager: Node
 
 func _ready() -> void:
 	# Get reference to PartyManager (autoload)
-	party_manager = get_tree().root.get_child(0).get_node_or_null("PartyManager")
-	if not party_manager:
+	if has_node("/root/PartyManager"):
+		party_manager = get_node("/root/PartyManager")
+	else:
 		push_error("PartyManager not found. Make sure it's set up as an autoload.")
 
 

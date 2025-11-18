@@ -42,8 +42,9 @@ var card_database: Node
 
 func _ready() -> void:
 	## Initialize card database reference
-	card_database = get_tree().root.get_child(0).get_node_or_null("CardDatabase")
-	if not card_database:
+	if has_node("/root/CardDatabase"):
+		card_database = get_node("/root/CardDatabase")
+	else:
 		push_error("CardDatabase not found. Make sure it's set up as an autoload.")
 
 
@@ -318,21 +319,21 @@ func _execute_aoe_damage(caster: Champion, targets: Array) -> bool:
 	return true
 
 
-func _execute_taunt(caster: Champion, targets: Array) -> bool:
+func _execute_taunt(caster: Champion, _targets: Array) -> bool:
 	## Execute taunt effect
 	## Add taunt buff to caster (enemies will target this champion next turn)
 	caster.add_buff("taunt", 1, duration if duration > 0 else 1)
 	return true
 
 
-func _execute_counter(caster: Champion, targets: Array) -> bool:
+func _execute_counter(caster: Champion, _targets: Array) -> bool:
 	## Execute counter effect
 	## Add counter buff (when hit, deal damage back to attacker)
 	caster.add_buff("counter", value, duration if duration > 0 else 1)
 	return true
 
 
-func _execute_revive(caster: Champion, targets: Array) -> bool:
+func _execute_revive(_caster: Champion, targets: Array) -> bool:
 	## Execute revive effect
 	## Revive a fallen champion with specified HP
 	for target in targets:
@@ -342,7 +343,7 @@ func _execute_revive(caster: Champion, targets: Array) -> bool:
 	return false
 
 
-func _execute_regen(caster: Champion, targets: Array) -> bool:
+func _execute_regen(_caster: Champion, targets: Array) -> bool:
 	## Execute regeneration effect
 	## Target heals specified amount per turn for duration
 	for target in targets:
@@ -351,7 +352,7 @@ func _execute_regen(caster: Champion, targets: Array) -> bool:
 	return true
 
 
-func _execute_cleanse_and_heal(caster: Champion, targets: Array) -> bool:
+func _execute_cleanse_and_heal(_caster: Champion, targets: Array) -> bool:
 	## Execute cleanse and heal effect
 	## Remove all debuffs from target and heal
 	for target in targets:
@@ -376,7 +377,7 @@ func _execute_damage_and_burn(caster: Champion, targets: Array) -> bool:
 	return true
 
 
-func _execute_block_and_thorns(caster: Champion, targets: Array) -> bool:
+func _execute_block_and_thorns(caster: Champion, _targets: Array) -> bool:
 	## Execute block and thorns effect
 	## Grant block to caster and apply thorns (attackers take damage)
 	caster.add_block(block_value)
@@ -384,7 +385,7 @@ func _execute_block_and_thorns(caster: Champion, targets: Array) -> bool:
 	return true
 
 
-func _execute_block_and_buff(caster: Champion, targets: Array) -> bool:
+func _execute_block_and_buff(caster: Champion, _targets: Array) -> bool:
 	## Execute block and buff effect
 	## Grant block to caster and buff for next turn
 	caster.add_block(block_value)
