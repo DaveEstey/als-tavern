@@ -21,8 +21,14 @@ signal card_play_requested(card_id: String, champion_index: int, target_indices:
 # Exported/Inspector properties
 @export var card_ui_scene: PackedScene = preload("res://scenes/ui/card_ui.tscn")
 
-# References
-@onready var cards_container: HBoxContainer = $CardsContainer
+# Card fan layout parameters
+@export var max_rotation: float = 0.15  # Maximum rotation in radians at edges
+@export var arc_height: float = 40.0    # Height of the arc curve
+@export var card_spacing: float = 100.0 # Base spacing between cards
+@export var max_card_spacing: float = 140.0  # Maximum spacing to prevent cards from being too far apart
+
+# References (no longer using HBoxContainer)
+# Cards are added directly to this Control node
 
 # State properties
 var current_cards: Array[Control] = []
@@ -34,9 +40,9 @@ var current_card_id: String = ""
 
 
 func _ready() -> void:
-	# Verify cards_container exists
-	if not cards_container:
-		push_error("CardsContainer not found in HandUI scene. Ensure it's named 'CardsContainer' with a UniqueNameInOwner.")
+	# Cards are now added directly to this Control node
+	# Set clip_contents to keep cards within hand bounds
+	clip_contents = true
 
 
 # Clear all cards from the hand
@@ -56,7 +62,7 @@ func add_card_to_hand(card_id: String) -> void:
 		return
 
 	var card_ui: Control = card_ui_scene.instantiate()
-	cards_container.add_child(card_ui)
+	add_child(card_ui)  # Add directly to Hand Control, not CardsContainer
 	current_cards.append(card_ui)
 
 	# Initialize card with data
@@ -66,6 +72,9 @@ func add_card_to_hand(card_id: String) -> void:
 	# Connect card signals
 	if card_ui.has_signal("card_dropped"):
 		card_ui.card_dropped.connect(_on_card_dropped)
+
+	# Arrange all cards in fan layout
+	_arrange_cards()
 
 
 # Remove a card UI from the hand by card ID
@@ -84,6 +93,9 @@ func remove_card_from_hand(card_id: String) -> void:
 
 	if targeting_mode:
 		exit_targeting_mode()
+
+	# Rearrange remaining cards
+	_arrange_cards()
 
 
 # Update the hand with a new list of card IDs
@@ -231,3 +243,52 @@ func get_card_ui_by_id(card_id: String) -> Control:
 		if card_ui.has_method("get_card_id") and card_ui.get_card_id() == card_id:
 			return card_ui
 	return null
+
+
+# Arrange cards in a fan layout
+# Uses normalized positioning (-1 to 1) to create consistent fan shape
+func _arrange_cards() -> void:
+	var card_count = current_cards.size()
+	if card_count == 0:
+		return
+
+	# Get hand center position
+	var hand_center_x = size.x / 2.0
+	var hand_center_y = size.y / 2.0
+
+	# Calculate spacing (limit to max_card_spacing)
+	var spacing = min(card_spacing, max_card_spacing)
+	if card_count > 1:
+		# Adjust spacing based on available width
+		var total_width_needed = (card_count - 1) * card_spacing
+		var available_width = size.x - 140  # Leave margins (card width is ~120)
+		if total_width_needed > available_width:
+			spacing = available_width / (card_count - 1)
+
+	# Position each card
+	for i in range(card_count):
+		var card = current_cards[i]
+
+		# Normalize position from -1 to 1 (0 is center)
+		var t: float = 0.0
+		if card_count > 1:
+			t = (float(i) / float(card_count - 1)) * 2.0 - 1.0
+
+		# Calculate horizontal position
+		var x_offset = t * spacing * (card_count - 1) / 2.0
+		var card_x = hand_center_x + x_offset - 60.0  # 60 is half card width
+
+		# Calculate arc offset (parabolic curve - makes middle cards higher)
+		var arc_offset = -arc_height * (t * t) + arc_height
+		var card_y = hand_center_y - arc_offset - 90.0  # 90 is half card height
+
+		# Calculate rotation (fan effect)
+		var rotation_angle = t * max_rotation
+
+		# Set card transform
+		card.position = Vector2(card_x, card_y)
+		card.rotation = rotation_angle
+
+		# Store base position for drag/drop (if card has this method)
+		if card.has_method("set_base_transform"):
+			card.set_base_transform(Vector2(card_x, card_y), rotation_angle)

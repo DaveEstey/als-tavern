@@ -42,6 +42,11 @@ var card_data: Dictionary = {}
 # Drag state tracking
 var is_being_dragged: bool = false
 var original_position: Vector2 = Vector2.ZERO
+var original_rotation: float = 0.0
+
+# Base transform set by hand layout (where card should return to)
+var base_position: Vector2 = Vector2.ZERO
+var base_rotation: float = 0.0
 
 # Current champion target (-1 means no champion selected)
 var selected_champion_index: int = -1
@@ -181,11 +186,9 @@ func _start_drag() -> void:
 	"""
 	is_being_dragged = true
 
-	# Store position in parent's coordinate system before going top-level
-	if get_parent():
-		original_position = get_parent().global_position + position
-	else:
-		original_position = global_position
+	# Store current base position/rotation to return to later
+	original_position = get_parent().global_position + base_position if get_parent() else global_position
+	original_rotation = base_rotation
 
 	# Make this card render on top and move freely
 	set_as_top_level(true)
@@ -194,6 +197,9 @@ func _start_drag() -> void:
 	# Calculate offset between card center and mouse position
 	var mouse_pos = get_global_mouse_position()
 	drag_offset = global_position - mouse_pos
+
+	# Reset rotation when dragging (cards should be flat when being dragged)
+	rotation = 0.0
 
 	# Visual feedback: slightly reduce scale while dragging
 	var tween = create_tween()
@@ -241,12 +247,14 @@ func _end_drag() -> void:
 	set_as_top_level(false)
 	z_index = 0
 
-	# Return card to hand (original position) with animation
+	# Return card to hand (base position and rotation) with animation
+	position = base_position
+	rotation = base_rotation
+
 	var tween = create_tween()
 	tween.set_trans(Tween.TRANS_QUAD)
 	tween.set_ease(Tween.EASE_OUT)
-	tween.tween_property(self, "global_position", original_position, animation_speed)
-	tween.parallel().tween_property(self, "scale", normal_scale, animation_speed)
+	tween.tween_property(self, "scale", normal_scale, animation_speed)
 
 
 # ============================================================================
@@ -358,6 +366,19 @@ func get_card_cost() -> int:
 		int: The card's cost
 	"""
 	return card_data.get("cost", 0)
+
+
+func set_base_transform(pos: Vector2, rot: float) -> void:
+	"""
+	Sets the base position and rotation for this card in the hand.
+	Called by HandUI when arranging cards in fan layout.
+
+	Args:
+		pos: The base position in the hand
+		rot: The base rotation angle in radians
+	"""
+	base_position = pos
+	base_rotation = rot
 
 
 # ============================================================================
