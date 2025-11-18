@@ -109,7 +109,7 @@ func _ready() -> void:
 
 		if enemy_ids.is_empty():
 			push_warning("No enemies set in GameManager, using default test enemies")
-			enemy_ids = ["goblin", "skeleton"]
+			enemy_ids = ["goblin_scout", "skeleton_warrior"]
 
 		battle_manager.initialize_battle(enemy_ids)
 	else:
@@ -217,7 +217,7 @@ func _on_card_drawn() -> void:
 
 
 ## Called when a card is played
-func _on_card_played(card: Card, caster: Champion, targets: Array) -> void:
+func _on_card_played(card: Card, caster: Champion, _targets: Array) -> void:
 	print("BattleScene: Card played - %s by %s" % [card.card_name, caster.champion_name])
 
 	# TODO: Show card play animation
@@ -309,8 +309,13 @@ func update_champion_displays() -> void:
 		var display = champion_displays[i]
 		var champion = battle_manager.champions[i]
 
+		if display and display.has_method("initialize"):
+			# Initialize display with champion reference
+			display.initialize(champion, i)
+
 		if display and display.has_method("update_display"):
-			display.update_display(champion)
+			# Update the display visuals
+			display.update_display()
 		elif display:
 			# Fallback if display doesn't have update_display method
 			# Hide or show based on champion existence
