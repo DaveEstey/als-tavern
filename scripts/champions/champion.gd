@@ -22,16 +22,17 @@ var party_manager: Node
 
 
 func _ready() -> void:
-	# Get reference to PartyManager (autoload)
-	if has_node("/root/PartyManager"):
-		party_manager = get_node("/root/PartyManager")
-	else:
-		push_error("PartyManager not found. Make sure it's set up as an autoload.")
+	# PartyManager reference will be set in initialize()
+	pass
 
 
 ## Initialize champion with data from PartyManager
 func initialize(champ_id: String) -> void:
 	champion_id = champ_id
+
+	# Get reference to PartyManager (autoload) - accessing at initialization time
+	if not party_manager:
+		party_manager = get_node("/root/PartyManager") if has_node("/root/PartyManager") else null
 
 	# Load champion data from PartyManager
 	if party_manager and party_manager.has_method("get_champion_data"):
