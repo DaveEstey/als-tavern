@@ -152,6 +152,29 @@ func _connect_ui_signals() -> void:
 	if hand_ui and hand_ui.has_signal("card_play_requested"):
 		hand_ui.card_play_requested.connect(_on_card_play_requested)
 
+	# Connect champion and enemy display targeting signals to hand_ui
+	_connect_display_targeting_signals()
+
+
+## Connect champion and enemy display targeting signals to hand_ui
+func _connect_display_targeting_signals() -> void:
+	if not hand_ui:
+		return
+
+	# Connect each champion display's targeting signal
+	for i in range(champion_displays.size()):
+		var display = champion_displays[i]
+		if display and display.has_signal("champion_clicked_for_targeting"):
+			if hand_ui.has_method("_on_champion_clicked"):
+				display.champion_clicked_for_targeting.connect(hand_ui._on_champion_clicked)
+
+	# Connect each enemy display's targeting signal
+	for i in range(enemy_displays.size()):
+		var display = enemy_displays[i]
+		if display and display.has_signal("enemy_clicked_for_targeting"):
+			if hand_ui.has_method("_on_enemy_clicked"):
+				display.enemy_clicked_for_targeting.connect(hand_ui._on_enemy_clicked)
+
 
 ## Called when a new turn phase starts
 func _on_turn_started(phase: String) -> void:
