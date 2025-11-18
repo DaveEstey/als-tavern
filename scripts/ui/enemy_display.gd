@@ -131,10 +131,14 @@ func _on_gui_input(event: InputEvent) -> void:
 	## Handle input events for enemy targeting
 	## Emits enemy_clicked_for_targeting signal on left mouse button click
 	if event is InputEventMouseButton:
+		print("EnemyDisplay %d: Mouse button event (pressed: %s, button: %d)" % [enemy_index, event.pressed, event.button_index])
 		if event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
 			if not is_dead:
+				print("EnemyDisplay %d: Emitting enemy_clicked_for_targeting" % enemy_index)
 				enemy_clicked_for_targeting.emit(enemy_index)
 				get_tree().root.set_input_as_handled()
+			else:
+				print("EnemyDisplay %d: Enemy is dead, ignoring click" % enemy_index)
 
 
 func _get_type_badge_text(enemy_type: String) -> String:

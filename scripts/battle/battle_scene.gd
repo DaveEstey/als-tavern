@@ -188,6 +188,10 @@ func _on_turn_started(phase: String) -> void:
 				phase_label.add_theme_color_override("font_color", Color(0.2, 1.0, 0.2))
 				if end_turn_button:
 					end_turn_button.disabled = false
+
+				# Draw new hand at start of player turn
+				_draw_new_hand()
+
 			"enemy_turn":
 				phase_label.text = "ENEMY TURN"
 				phase_label.add_theme_color_override("font_color", Color(1.0, 0.2, 0.2))
@@ -202,6 +206,21 @@ func _on_turn_started(phase: String) -> void:
 
 	# Update all displays
 	update_all_displays()
+
+
+## Reset hand UI for new turn (battle_manager handles drawing cards)
+func _draw_new_hand() -> void:
+	if not hand_ui:
+		return
+
+	print("BattleScene: Resetting hand for new turn")
+
+	# Reset the played cards tracker for new turn
+	if hand_ui.has_method("reset_turn"):
+		hand_ui.reset_turn()
+
+	# Note: battle_manager.start_player_turn() already calls draw_cards(5)
+	# The card_drawn signals will update hand_ui automatically
 
 
 ## Called when a card is drawn from the deck
@@ -403,29 +422,107 @@ func _update_gold_label() -> void:
 func _on_end_turn_button_pressed() -> void:
 	print("BattleScene: End Turn button pressed")
 
-	if battle_manager and battle_manager.current_phase == "player_turn":
-		battle_manager.end_player_turn()
-
-
-## Called when player requests to play a card
-func _on_card_play_requested(card_id: String, champion_index: int, target_indices: Array[int]) -> void:
-	print("BattleScene: Card play requested - %s by champion %d" % [card_id, champion_index])
-
-	if not battle_manager:
+	if not battle_manager or battle_manager.current_phase != "player_turn":
 		return
 
-	# Attempt to play the card
-	var success = battle_manager.play_card(card_id, champion_index, target_indices)
+	# Execute all queued actions before ending turn
+	_execute_queued_actions()
 
-	if success:
-		# Remove card from hand UI
-		if hand_ui and hand_ui.has_method("remove_card_from_hand"):
-			hand_ui.remove_card_from_hand(card_id)
+	# Clear hand UI (battle_manager will handle discarding cards when next turn starts)
+	if hand_ui:
+		hand_ui.clear_hand()
+		print("BattleScene: Cleared hand UI")
 
-		# Update displays after successful card play
-		update_all_displays()
-	else:
-		print("BattleScene: Failed to play card %s" % card_id)
+	# End the player turn (enemies will attack)
+	battle_manager.end_player_turn()
+
+	# After enemy turn ends, start_player_turn() will be called which:
+	# 1. Discards old hand to discard pile
+	# 2. Draws 5 new cards
+	# 3. Emits turn_started("player_turn") which calls _draw_new_hand()
+
+
+## Execute all queued actions from champion displays
+func _execute_queued_actions() -> void:
+	print("BattleScene: Executing queued actions...")
+
+	for i in range(champion_displays.size()):
+		var champion_display = champion_displays[i]
+		if not champion_display:
+			continue
+
+		var queued_action = champion_display.get_queued_action()
+		var action_type = queued_action.get("type", "")
+
+		if action_type == "":
+			continue  # No action queued
+
+		# Get targets (stored when player selected them)
+		var target_indices: Array[int] = []
+		if champion_display.has_meta("queued_targets"):
+			var raw_targets = champion_display.get_meta("queued_targets")
+			if raw_targets is Array:
+				for t in raw_targets:
+					if t is int:
+						target_indices.append(t)
+
+		print("  Champion %d: %s action" % [i, action_type])
+
+		match action_type:
+			"card":
+				var card_id = queued_action.get("card_id", "")
+				if card_id:
+					var success = battle_manager.play_card(card_id, i, target_indices)
+					if success:
+						print("    Card %s played successfully" % card_id)
+					else:
+						print("    Failed to play card %s" % card_id)
+
+			"attack":
+				# Execute basic attack - champion deals damage to target enemy
+				if target_indices.is_empty():
+					print("    Attack action failed: No target selected")
+				else:
+					var enemy_index = target_indices[0]
+					if battle_manager and battle_manager.has_method("execute_basic_attack"):
+						var success = battle_manager.execute_basic_attack(i, enemy_index)
+						if success:
+							print("    Basic attack executed successfully")
+						else:
+							print("    Basic attack failed")
+					else:
+						print("    Warning: execute_basic_attack method not found in battle_manager")
+
+			"defend":
+				# Execute defend action - champion gains block
+				if battle_manager and battle_manager.has_method("execute_defend"):
+					var success = battle_manager.execute_defend(i)
+					if success:
+						print("    Defend executed successfully")
+					else:
+						print("    Defend failed")
+				else:
+					print("    Warning: execute_defend method not found in battle_manager")
+
+		# Clear the queued action after execution
+		champion_display.clear_queued_action()
+		champion_display.remove_meta("queued_targets")
+
+	# Update all displays after executing actions
+	update_all_displays()
+
+
+## Called when player requests to play a card (stores target info on champion)
+func _on_card_play_requested(card_id: String, champion_index: int, target_indices: Array[int]) -> void:
+	print("BattleScene: Card target selected - %s by champion %d, targets: %s" % [card_id, champion_index, str(target_indices)])
+
+	# Store the target information on the champion display
+	if champion_index >= 0 and champion_index < champion_displays.size():
+		var champion_display = champion_displays[champion_index]
+		if champion_display:
+			# Store target_indices as metadata on the champion display
+			champion_display.set_meta("queued_targets", target_indices)
+			print("  Stored targets on champion %d" % champion_index)
 
 
 ## Show the victory or defeat screen with results

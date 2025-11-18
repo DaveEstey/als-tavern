@@ -442,11 +442,18 @@ func _check_champion_hover() -> void:
 
 	# Update highlight if champion changed
 	if new_champion_index != selected_champion_index:
-		# Clear old highlight
+		# Clear old highlight (only if no action is queued on that champion)
 		if selected_champion_index >= 0 and selected_champion_index < champions_container.get_child_count():
 			var old_display = champions_container.get_child(selected_champion_index)
 			if old_display and old_display.has_method("set_highlighted"):
-				old_display.set_highlighted(false)
+				# Only clear if there's no queued action
+				var has_queued_action = false
+				if old_display.has_method("get_queued_action"):
+					var queued = old_display.get_queued_action()
+					has_queued_action = queued.get("type", "") != ""
+
+				if not has_queued_action:
+					old_display.set_highlighted(false)
 
 		# Set new highlight
 		selected_champion_index = new_champion_index
@@ -454,4 +461,6 @@ func _check_champion_hover() -> void:
 			var new_display = champions_container.get_child(selected_champion_index)
 			if new_display and new_display.has_method("set_highlighted"):
 				# Highlight with card's champion color
-				new_display.set_highlighted(true)
+				var champion_id = card_data.get("champion", "")
+				var card_color = get_champion_color(champion_id)
+				new_display.set_highlighted(true, card_color)

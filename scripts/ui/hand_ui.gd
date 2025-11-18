@@ -38,6 +38,9 @@ var target_type: String = ""
 var current_champion_index: int = -1
 var current_card_id: String = ""
 
+# Track which cards have been played this turn (can't be played again)
+var played_cards_this_turn: Array[String] = []
+
 
 func _ready() -> void:
 	# Cards are now added directly to this Control node
@@ -54,12 +57,24 @@ func clear_hand() -> void:
 	exit_targeting_mode()
 
 
+# Clear played cards tracking for new turn
+func reset_turn() -> void:
+	played_cards_this_turn.clear()
+	print("HandUI: Cleared played cards tracking for new turn")
+
+
 # Add a card UI to the hand
 # card_id: The unique identifier for the card
 func add_card_to_hand(card_id: String) -> void:
 	if not card_ui_scene:
 		push_error("card_ui_scene not set in HandUI. Ensure card_ui_scene is assigned in inspector or preloaded.")
 		return
+
+	# Check if this card already exists in hand (avoid duplicates)
+	for existing_card in current_cards:
+		if existing_card.has_method("get_card_id") and existing_card.get_card_id() == card_id:
+			print("HandUI: Card %s already in hand, skipping" % card_id)
+			return
 
 	var card_ui: Control = card_ui_scene.instantiate()
 	add_child(card_ui)  # Add directly to Hand Control, not CardsContainer
@@ -112,18 +127,75 @@ func update_hand(card_ids: Array) -> void:
 # champion_index: The index of the champion who will play the card
 # target_indices: The target indices (empty array if targeting mode needed)
 func _on_card_dropped(card_id: String, champion_index: int, target_indices: Array[int]) -> void:
+	# Get card data
+	var card_data: Dictionary = CardDatabase.get_card_data(card_id)
+	var card_champion: String = card_data.get("champion", "")
+	var card_target_type: String = card_data.get("target_type", "single_enemy")
+	var card_name: String = card_data.get("name", "Card")
+
+	# Check if card has already been played this turn
+	if card_id in played_cards_this_turn:
+		print("HandUI: Card %s already played this turn, ignoring" % card_id)
+		return
+
+	# Get the champion this card is being dropped on
+	var battle_scene = get_tree().current_scene
+	if not battle_scene:
+		return
+
+	var champions_container = battle_scene.get_node_or_null("ChampionsContainer")
+	if not champions_container or champion_index >= champions_container.get_child_count():
+		return
+
+	var champion_display = champions_container.get_child(champion_index)
+	if not champion_display:
+		return
+
+	# Check if champion matches card (get champion's ID)
+	var champion = champion_display.champion if "champion" in champion_display else null
+	if champion:
+		var champion_id = champion.champion_id if "champion_id" in champion else ""
+
+		# Validate card belongs to this champion
+		if card_champion != "" and champion_id != "" and card_champion != champion_id:
+			print("HandUI: Card %s (%s) cannot be played on %s champion" % [card_name, card_champion, champion_id])
+			# Return card to original position (snap back animation already handles this)
+			return
+
+		print("HandUI: Card %s validated for champion %s" % [card_name, champion_id])
+
 	current_champion_index = champion_index
 	current_card_id = card_id
 
-	# Get target_type from card data
-	var card_data: Dictionary = CardDatabase.get_card_data(card_id)
-	var card_target_type: String = card_data.get("target_type", "single_enemy")
+	# Queue the card on the champion display
+	var previous_card_id = ""
+	if champion_display.has_method("queue_card_action"):
+		previous_card_id = champion_display.queue_card_action(card_id, card_name)
 
-	# For single target types, enter targeting mode
-	if target_indices.is_empty() and card_target_type not in ["all_enemies", "all_allies"]:
-		enter_targeting_mode(selected_card, card_target_type)
+	# If there was a previous card queued, remove it from played list and return to hand
+	if previous_card_id != "" and previous_card_id != card_id:
+		if previous_card_id in played_cards_this_turn:
+			played_cards_this_turn.erase(previous_card_id)
+		add_card_to_hand(previous_card_id)
+
+	# Mark this card as played
+	played_cards_this_turn.append(card_id)
+
+	# Enter targeting mode if card needs a target
+	if card_target_type not in ["all_enemies", "all_allies", "self"]:
+		# Don't remove card yet - wait for target selection
+		print("HandUI: Entering targeting mode for %s (target_type: %s)" % [card_name, card_target_type])
+		enter_targeting_mode(null, card_target_type)
 	else:
-		# For all targets types or if targets already selected, execute immediately
+		# Auto-target for AoE or self cards
+		# For "self" cards, pass empty array (battle_manager handles it)
+		# For "all_enemies" and "all_allies", also pass empty array
+		target_indices = []
+
+		# Remove card from hand after queueing
+		remove_card_from_hand(card_id)
+
+		# Store targets for execution
 		card_play_requested.emit(card_id, champion_index, target_indices)
 		exit_targeting_mode()
 
@@ -155,8 +227,8 @@ func exit_targeting_mode() -> void:
 	current_champion_index = -1
 	current_card_id = ""
 
-	# TODO: Clear highlighting when champion/enemy display systems are ready
-	# _clear_target_highlighting()
+	# Clear highlighting
+	_clear_target_highlighting()
 
 
 # Handle ally/champion being clicked during targeting
@@ -168,39 +240,78 @@ func _on_champion_clicked(champion_index: int) -> void:
 	# Only allow targeting allies if target_type requires it
 	if target_type in ["single_ally", "all_allies"]:
 		var target_indices: Array[int] = [champion_index]
-		card_play_requested.emit(current_card_id, current_champion_index, target_indices)
+
+		# Store values before they get reset
+		var champ_idx = current_champion_index
+		var card_id = current_card_id
+
+		# Remove card from hand after target is selected (only if it's a real card, not "basic_attack")
+		if current_card_id != "" and current_card_id != "basic_attack":
+			remove_card_from_hand(current_card_id)
+
+		# Emit signal to store targets (use stored values)
+		card_play_requested.emit(card_id, champ_idx, target_indices)
 		exit_targeting_mode()
 
 
 # Handle enemy being clicked during targeting
 # enemy_index: The index of the enemy clicked
 func _on_enemy_clicked(enemy_index: int) -> void:
+	print("HandUI: Enemy %d clicked (targeting_mode: %s, target_type: %s)" % [enemy_index, targeting_mode, target_type])
+
 	if not targeting_mode:
 		return
 
 	# Only allow targeting enemies if target_type requires it
 	if target_type in ["single_enemy", "all_enemies"]:
 		var target_indices: Array[int] = [enemy_index]
-		card_play_requested.emit(current_card_id, current_champion_index, target_indices)
+
+		print("HandUI: Valid enemy target selected. Champion: %d, Card: %s, Target: %d" % [current_champion_index, current_card_id, enemy_index])
+
+		# Store values before they get reset
+		var champ_idx = current_champion_index
+		var card_id = current_card_id
+
+		# Remove card from hand after target is selected (only if it's a real card, not "basic_attack")
+		if current_card_id != "" and current_card_id != "basic_attack":
+			remove_card_from_hand(current_card_id)
+
+		# Emit signal to store targets (use stored values)
+		card_play_requested.emit(card_id, champ_idx, target_indices)
 		exit_targeting_mode()
+	else:
+		print("HandUI: Wrong target type for enemy. Expected single_enemy or all_enemies, got: %s" % target_type)
 
 
 # Highlight valid targets based on target_type
-# TODO: Integrate with champion_display.gd and enemy_display.gd
 func _highlight_valid_targets() -> void:
+	var battle_scene = get_tree().current_scene
+	if not battle_scene:
+		return
+
 	match target_type:
-		"single_enemy":
+		"single_enemy", "all_enemies":
 			# Highlight all enemies
+			var enemies_container = battle_scene.get_node_or_null("EnemiesContainer")
+			if enemies_container:
+				for enemy_display in enemies_container.get_children():
+					if enemy_display and enemy_display.has_method("set_highlighted"):
+						enemy_display.set_highlighted(true)
+
+		"single_ally", "all_allies":
+			# Highlight all champions/allies
+			var champions_container = battle_scene.get_node_or_null("ChampionsContainer")
+			if champions_container:
+				for champion_display in champions_container.get_children():
+					if champion_display and champion_display.has_method("set_highlighted"):
+						# Use a healing green color for ally targeting
+						champion_display.set_highlighted(true, Color(0.3, 1.0, 0.3))
+
+		"self":
+			# Self-targeting cards don't need highlighting
+			# The champion who plays it is already selected
 			pass
-		"all_enemies":
-			# Highlight all enemies
-			pass
-		"single_ally":
-			# Highlight all allies/champions
-			pass
-		"all_allies":
-			# Highlight all allies/champions
-			pass
+
 		_:
 			push_warning("Unknown target type: %s" % target_type)
 
@@ -229,10 +340,28 @@ func _auto_execute_all_targets() -> void:
 
 
 # Clear target highlighting
-# TODO: Integrate with champion_display.gd and enemy_display.gd
 func _clear_target_highlighting() -> void:
-	# Remove visual highlighting from all potential targets
-	pass
+	var battle_scene = get_tree().current_scene
+	if not battle_scene:
+		return
+
+	# Clear enemy highlighting
+	var enemies_container = battle_scene.get_node_or_null("EnemiesContainer")
+	if enemies_container:
+		for enemy_display in enemies_container.get_children():
+			if enemy_display and enemy_display.has_method("set_highlighted"):
+				enemy_display.set_highlighted(false)
+
+	# Clear champion highlighting (except for queued actions)
+	var champions_container = battle_scene.get_node_or_null("ChampionsContainer")
+	if champions_container:
+		for champion_display in champions_container.get_children():
+			if champion_display and champion_display.has_method("set_highlighted"):
+				# Only clear if there's no queued action
+				if champion_display.has_method("get_queued_action"):
+					var queued = champion_display.get_queued_action()
+					if queued.get("type", "") == "":
+						champion_display.set_highlighted(false)
 
 
 # Get the card UI by card ID
@@ -248,13 +377,28 @@ func get_card_ui_by_id(card_id: String) -> Control:
 # Arrange cards in a fan layout
 # Uses normalized positioning (-1 to 1) to create consistent fan shape
 func _arrange_cards() -> void:
+	# Clean up any invalid cards first
+	for i in range(current_cards.size() - 1, -1, -1):
+		if not is_instance_valid(current_cards[i]):
+			print("HandUI: Removing invalid card at index %d" % i)
+			current_cards.remove_at(i)
+
 	var card_count = current_cards.size()
 	if card_count == 0:
 		return
 
+	print("HandUI: Arranging %d cards in hand" % card_count)
+
 	# Wait for Hand to be properly sized by layout system
 	# Use get_rect() which is more reliable than size property during initialization
 	await get_tree().process_frame
+
+	# If card_count changed during await, just use the new count (don't recurse)
+	if card_count != current_cards.size():
+		print("HandUI: Card count changed during arrange (%d -> %d), using new count" % [card_count, current_cards.size()])
+		card_count = current_cards.size()
+		if card_count == 0:
+			return
 
 	# Get hand dimensions - use get_rect() to ensure we have correct size
 	var hand_rect = get_rect()
@@ -268,8 +412,6 @@ func _arrange_cards() -> void:
 		hand_width = 800.0
 		hand_height = 180.0
 
-	print("HandUI: Arranging %d cards in hand (size: %.0fx%.0f)" % [card_count, hand_width, hand_height])
-
 	var hand_center_x = hand_width / 2.0
 	var hand_center_y = hand_height / 2.0
 
@@ -282,8 +424,11 @@ func _arrange_cards() -> void:
 		if total_width_needed > available_width:
 			spacing = available_width / (card_count - 1)
 
-	# Position each card
+	# Position each card (with bounds check)
 	for i in range(card_count):
+		if i >= current_cards.size():
+			print("HandUI: ERROR - Index %d out of bounds (size: %d)" % [i, current_cards.size()])
+			break
 		var card = current_cards[i]
 
 		# Normalize position from -1 to 1 (0 is center)

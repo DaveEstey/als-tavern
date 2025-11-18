@@ -52,9 +52,16 @@ func initialize(id: String) -> void:
 	## Load card data from CardDatabase
 	self.card_id = id
 
+	# Ensure card_database reference is set (in case _ready hasn't been called)
 	if not card_database:
-		push_error("CardDatabase not available for card initialization")
-		return
+		# Get CardDatabase from autoload directly
+		var root = Engine.get_main_loop() as SceneTree
+		if root:
+			card_database = root.root.get_node_or_null("CardDatabase")
+
+		if not card_database:
+			push_error("CardDatabase not available for card initialization")
+			return
 
 	# Get card data from database
 	var card_data: Dictionary = card_database.get_card_data(id)
@@ -155,7 +162,11 @@ func execute(caster: Champion, targets: Array) -> bool:
 	## Execute the card effect on targets
 	## Returns true if execution was successful
 
-	if not caster or targets.is_empty():
+	if not caster:
+		return false
+
+	# For self-targeting cards, targets can be empty (caster is the target)
+	if targets.is_empty() and target_type != "self":
 		return false
 
 	match effect_type:
@@ -216,9 +227,34 @@ func _execute_damage(caster: Champion, targets: Array) -> bool:
 	## Execute damage effect
 	## Damage = card value + caster's damage stat
 	for target in targets:
+		var total_damage: int = value + caster.damage
+
 		if target is Champion:
-			var total_damage: int = value + caster.damage
+			# Damage to champion (ally)
 			target.take_damage(total_damage)
+			print("Dealt %d damage to champion %s" % [total_damage, target.champion_name])
+		elif target is Dictionary:
+			# Damage to enemy
+			var enemy_hp = target.get("current_hp", 0)
+			var block = target.get("block", 0)
+
+			# Apply block first
+			if block > 0:
+				var blocked = min(block, total_damage)
+				total_damage -= blocked
+				target["block"] = block - blocked
+				print("Enemy blocked %d damage (%d remaining)" % [blocked, total_damage])
+
+			# Apply remaining damage
+			if total_damage > 0:
+				target["current_hp"] = max(0, enemy_hp - total_damage)
+				print("Dealt %d damage to %s (HP: %d -> %d)" % [total_damage, target.get("name", "Enemy"), enemy_hp, target["current_hp"]])
+
+				# Mark as dead if HP reaches 0
+				if target["current_hp"] <= 0:
+					target["is_dead"] = true
+					print("%s defeated!" % target.get("name", "Enemy"))
+
 	return true
 
 

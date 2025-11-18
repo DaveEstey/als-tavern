@@ -250,6 +250,11 @@ func play_card(card_id: String, champion_index: int, target_indices: Array) -> b
 	return false
 
 
+## Execute basic attack: Champion attacks enemy (wrapper for action queue)
+func execute_basic_attack(champion_index: int, enemy_index: int) -> bool:
+	return basic_attack(champion_index, enemy_index)
+
+
 ## Execute basic attack: Champion attacks enemy
 func basic_attack(champion_index: int, enemy_index: int) -> bool:
 	# Validate inputs
@@ -311,6 +316,11 @@ func basic_attack(champion_index: int, enemy_index: int) -> bool:
 
 
 ## Execute basic defend: Champion gains block
+## Execute defend: Champion gains block (wrapper for action queue)
+func execute_defend(champion_index: int) -> bool:
+	return basic_defend(champion_index)
+
+
 func basic_defend(champion_index: int) -> bool:
 	# Validate inputs
 	if current_phase != "player_turn":
