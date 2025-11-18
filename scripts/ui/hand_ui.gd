@@ -22,7 +22,7 @@ signal card_play_requested(card_id: String, champion_index: int, target_indices:
 @export var card_ui_scene: PackedScene  # Should be preloaded with: preload("res://scenes/ui/card_ui.tscn")
 
 # References
-@onready var cards_container: HBoxContainer = %CardsContainer
+@onready var cards_container: HBoxContainer = $CardsContainer
 
 # State properties
 var current_cards: Array[Control] = []

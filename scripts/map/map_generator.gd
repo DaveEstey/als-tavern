@@ -53,7 +53,7 @@ func _generate_node_grid() -> void:
 	var start_node: Dictionary = _create_node(
 		node_id_counter,
 		"rest",  # Will be set in _place_special_nodes, but starting as rest
-		Vector2i(map_width / 2, 0)
+		Vector2i(floori(map_width / 2.0), 0)
 	)
 	nodes.append(start_node)
 	node_id_counter += 1
@@ -84,7 +84,7 @@ func _generate_node_grid() -> void:
 	var boss_node: Dictionary = _create_node(
 		node_id_counter,
 		"boss",
-		Vector2i(map_width / 2, rows - 1)
+		Vector2i(floori(map_width / 2.0), rows - 1)
 	)
 	nodes.append(boss_node)
 	node_id_counter += 1
