@@ -418,6 +418,10 @@ func _on_card_play_requested(card_id: String, champion_index: int, target_indice
 	var success = battle_manager.play_card(card_id, champion_index, target_indices)
 
 	if success:
+		# Remove card from hand UI
+		if hand_ui and hand_ui.has_method("remove_card_from_hand"):
+			hand_ui.remove_card_from_hand(card_id)
+
 		# Update displays after successful card play
 		update_all_displays()
 	else:
