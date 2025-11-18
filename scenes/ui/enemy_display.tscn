@@ -33,14 +33,11 @@ text = "Enemy"
 horizontal_alignment = 1
 
 [node name="HealthContainer" type="VBoxContainer" parent="."]
-layout_mode = 1
-anchors_preset = 12
-anchor_top = 1.0
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_top = -50.0
-grow_horizontal = 2
-grow_vertical = 0
+layout_mode = 0
+offset_left = 10.0
+offset_top = 127.0
+offset_right = 190.0
+offset_bottom = 167.0
 
 [node name="HPBar" type="ProgressBar" parent="HealthContainer"]
 layout_mode = 2
@@ -54,12 +51,11 @@ text = "100 / 100"
 horizontal_alignment = 1
 
 [node name="BlockIndicator" type="Label" parent="."]
-layout_mode = 1
-anchors_preset = 10
-anchor_right = 1.0
-offset_top = 130.0
-offset_bottom = 145.0
-grow_horizontal = 2
+layout_mode = 0
+offset_left = 10.0
+offset_top = 169.0
+offset_right = 190.0
+offset_bottom = 184.0
 text = "Block: 0"
 horizontal_alignment = 1
 visible = false
