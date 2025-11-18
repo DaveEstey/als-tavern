@@ -47,18 +47,18 @@ func _ready() -> void:
 		push_error("CardDatabase not found. Make sure it's set up as an autoload.")
 
 
-func initialize(card_id: String) -> void:
+func initialize(id: String) -> void:
 	## Load card data from CardDatabase
-	self.card_id = card_id
+	self.card_id = id
 
 	if not card_database:
 		push_error("CardDatabase not available for card initialization")
 		return
 
 	# Get card data from database
-	var card_data: Dictionary = card_database.get_card_data(card_id)
+	var card_data: Dictionary = card_database.get_card_data(id)
 	if card_data.is_empty():
-		push_error("Card data not found for ID: %s" % card_id)
+		push_error("Card data not found for ID: %s" % id)
 		return
 
 	# Load basic properties
@@ -256,7 +256,7 @@ func _execute_conditional_damage(caster: Champion, targets: Array) -> bool:
 	return true
 
 
-func _execute_heal(caster: Champion, targets: Array) -> bool:
+func _execute_heal(_caster: Champion, targets: Array) -> bool:
 	## Execute heal effect
 	## Healing = card value
 	for target in targets:

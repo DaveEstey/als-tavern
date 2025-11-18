@@ -82,7 +82,6 @@ func take_damage(amount: int) -> int:
 	total_damage = max(1, total_damage - defense_reduction)
 
 	# Apply block first (absorbs damage before HP)
-	var remaining_block = block
 	if block > 0:
 		if total_damage <= block:
 			block -= total_damage

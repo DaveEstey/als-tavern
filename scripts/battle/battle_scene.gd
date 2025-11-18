@@ -84,8 +84,9 @@ var game_manager: Node
 
 func _ready() -> void:
 	# Get reference to GameManager (autoload)
-	game_manager = get_tree().root.get_child(0).get_node_or_null("GameManager")
-	if not game_manager:
+	if has_node("/root/GameManager"):
+		game_manager = get_node("/root/GameManager")
+	else:
 		push_error("GameManager not found. Make sure it's set up as an autoload.")
 		return
 
