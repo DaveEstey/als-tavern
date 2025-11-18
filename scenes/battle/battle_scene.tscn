@@ -82,51 +82,49 @@ offset_bottom = 700.0
 script = ExtResource("5")
 
 [node name="PhaseLabel" type="Label" parent="."]
-layout_mode = 1
-anchors_left = 0.5
-anchors_top = 0.02
-anchors_right = 0.5
-anchors_bottom = 0.08
-offset_left = -100.0
-offset_right = 100.0
+layout_mode = 0
+offset_left = 540.0
+offset_top = 15.0
+offset_right = 740.0
+offset_bottom = 55.0
 text = "Phase: Planning"
 horizontal_alignment = 1
 vertical_alignment = 1
 theme_override_font_sizes/font_size = 24
 
 [node name="ActionsLabel" type="Label" parent="."]
-layout_mode = 1
-anchors_left = 0.2
-anchors_top = 0.02
-anchors_right = 0.4
-anchors_bottom = 0.08
+layout_mode = 0
+offset_left = 850.0
+offset_top = 15.0
+offset_right = 1000.0
+offset_bottom = 40.0
 text = "Actions: 3"
 theme_override_font_sizes/font_size = 14
 
 [node name="GoldLabel" type="Label" parent="."]
-layout_mode = 1
-anchors_left = 0.2
-anchors_top = 0.09
-anchors_right = 0.4
-anchors_bottom = 0.15
+layout_mode = 0
+offset_left = 850.0
+offset_top = 45.0
+offset_right = 1000.0
+offset_bottom = 70.0
 text = "Gold: 0"
 theme_override_font_sizes/font_size = 14
 
 [node name="DeckCountLabel" type="Label" parent="."]
-layout_mode = 1
-anchors_left = 0.02
-anchors_top = 0.02
-anchors_right = 0.15
-anchors_bottom = 0.08
+layout_mode = 0
+offset_left = 20.0
+offset_top = 15.0
+offset_right = 150.0
+offset_bottom = 40.0
 text = "Deck: 20"
 theme_override_font_sizes/font_size = 12
 
 [node name="DiscardCountLabel" type="Label" parent="."]
-layout_mode = 1
-anchors_left = 0.02
-anchors_top = 0.09
-anchors_right = 0.15
-anchors_bottom = 0.15
+layout_mode = 0
+offset_left = 20.0
+offset_top = 45.0
+offset_right = 150.0
+offset_bottom = 70.0
 text = "Discard: 0"
 theme_override_font_sizes/font_size = 12
 

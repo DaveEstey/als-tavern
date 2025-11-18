@@ -41,8 +41,8 @@ var current_card_id: String = ""
 
 func _ready() -> void:
 	# Cards are now added directly to this Control node
-	# Set clip_contents to keep cards within hand bounds
-	clip_contents = true
+	# Allow cards to render outside hand bounds for arc effect
+	clip_contents = false
 
 
 # Clear all cards from the hand
@@ -256,6 +256,15 @@ func _arrange_cards() -> void:
 	var hand_center_x = size.x / 2.0
 	var hand_center_y = size.y / 2.0
 
+	# Debug: Check if size is valid
+	if size.x == 0 or size.y == 0:
+		print("HandUI: Warning - Hand size is zero! Deferring arrangement...")
+		# Defer the arrangement until next frame when size should be set
+		call_deferred("_arrange_cards")
+		return
+
+	print("HandUI: Arranging %d cards in hand (size: %v)" % [card_count, size])
+
 	# Calculate spacing (limit to max_card_spacing)
 	var spacing = min(card_spacing, max_card_spacing)
 	if card_count > 1:
@@ -288,6 +297,10 @@ func _arrange_cards() -> void:
 		# Set card transform
 		card.position = Vector2(card_x, card_y)
 		card.rotation = rotation_angle
+
+		# Debug: Print card position
+		if i == 0:  # Only print first card to avoid spam
+			print("  Card %d positioned at: %v, rotation: %.2f" % [i, card.position, rotation_angle])
 
 		# Store base position for drag/drop (if card has this method)
 		if card.has_method("set_base_transform"):
