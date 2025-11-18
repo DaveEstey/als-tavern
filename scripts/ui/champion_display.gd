@@ -36,7 +36,7 @@ var has_acted: bool = false
 @onready var defend_button: Button = $VBoxContainer/ActionButtonsContainer/DefendButton
 
 # Signals
-signal champion_selected(champion_index: int)
+# signal champion_selected(champion_index: int)  # Currently unused
 signal attack_pressed(champion_index: int)
 signal defend_pressed(champion_index: int)
 signal champion_clicked_for_targeting(champion_index: int)
@@ -107,7 +107,7 @@ func update_display() -> void:
 		return
 
 	# Update name
-	name_label.text = champion.name if champion.name else "Champion"
+	name_label.text = str(champion.champion_name) if champion.champion_name else "Champion"
 
 	# Update HP bar and text
 	var current_hp = champion.current_hp if champion.current_hp > 0 else 0

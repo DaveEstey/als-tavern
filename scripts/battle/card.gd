@@ -265,7 +265,7 @@ func _execute_heal(_caster: Champion, targets: Array) -> bool:
 	return true
 
 
-func _execute_block(caster: Champion, targets: Array) -> bool:
+func _execute_block(_caster: Champion, targets: Array) -> bool:
 	## Execute block effect
 	## Grant block to target(s)
 	for target in targets:

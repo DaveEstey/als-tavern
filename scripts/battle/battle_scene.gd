@@ -98,7 +98,15 @@ func _ready() -> void:
 
 	# Initialize battle with enemies from GameManager
 	if game_manager and "current_battle_enemies" in game_manager:
-		var enemy_ids = game_manager.current_battle_enemies
+		var enemy_ids: Array[String] = []
+		var raw_enemies = game_manager.current_battle_enemies
+
+		# Ensure proper typing
+		if raw_enemies is Array:
+			for enemy in raw_enemies:
+				if enemy is String:
+					enemy_ids.append(enemy)
+
 		if enemy_ids.is_empty():
 			push_warning("No enemies set in GameManager, using default test enemies")
 			enemy_ids = ["goblin", "skeleton"]

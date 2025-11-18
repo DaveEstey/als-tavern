@@ -48,8 +48,8 @@ func clear_hand() -> void:
 
 
 # Add a card UI to the hand
-# card_id: The unique identifier for the card
-func add_card_to_hand(card_id: String) -> void:
+# _card_id: The unique identifier for the card (currently unused until card_ui fully implemented)
+func add_card_to_hand(_card_id: String) -> void:
 	if not card_ui_scene:
 		push_error("card_ui_scene not set in HandUI. Ensure card_ui_scene is assigned in inspector or preloaded.")
 		return
@@ -64,8 +64,8 @@ func add_card_to_hand(card_id: String) -> void:
 
 
 # Remove a card UI from the hand by card ID
-# card_id: The unique identifier for the card to remove
-func remove_card_from_hand(card_id: String) -> void:
+# _card_id: The unique identifier for the card to remove (currently unused until card_ui fully implemented)
+func remove_card_from_hand(_card_id: String) -> void:
 	for i in range(current_cards.size() - 1, -1, -1):
 		var card_ui = current_cards[i]
 		# TODO: Match by card_id when card_ui stores this information
@@ -225,7 +225,7 @@ func _clear_target_highlighting() -> void:
 
 # Get the card UI by card ID
 # Returns null if card not found
-func get_card_ui_by_id(card_id: String) -> Control:
+func get_card_ui_by_id(_card_id: String) -> Control:
 	for card_ui in current_cards:
 		# TODO: Match by card_id when card_ui stores this information
 		# if card_ui.card_id == card_id:
