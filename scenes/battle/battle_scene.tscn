@@ -33,14 +33,12 @@ color = Color(0.1, 0.1, 0.15, 1.0)
 script = ExtResource("2")
 
 [node name="ChampionsContainer" type="VBoxContainer" parent="."]
-layout_mode = 1
-anchors_left = 0.0
-anchors_top = 0.1
-anchors_right = 0.2
-anchors_bottom = 0.9
-offset_left = 10.0
-offset_right = -10.0
-separation = 10
+layout_mode = 0
+offset_left = 20.0
+offset_top = 80.0
+offset_right = 220.0
+offset_bottom = 640.0
+separation = 20
 
 [node name="ChampionDisplay1" parent="ChampionsContainer" instance=ExtResource("3")]
 custom_minimum_size = Vector2(150, 150)
@@ -55,14 +53,12 @@ custom_minimum_size = Vector2(150, 150)
 layout_mode = 2
 
 [node name="EnemiesContainer" type="HBoxContainer" parent="."]
-layout_mode = 1
-anchors_left = 0.75
-anchors_top = 0.1
-anchors_right = 0.95
-anchors_bottom = 0.9
-offset_left = 10.0
-offset_right = -10.0
-separation = 10
+layout_mode = 0
+offset_left = 900.0
+offset_top = 80.0
+offset_right = 1260.0
+offset_bottom = 640.0
+separation = 15
 alignment = 1
 
 [node name="EnemyDisplay1" parent="EnemiesContainer" instance=ExtResource("4")]
@@ -78,22 +74,21 @@ custom_minimum_size = Vector2(120, 200)
 layout_mode = 2
 
 [node name="Hand" type="Control" parent="."]
-layout_mode = 1
-anchors_left = 0.2
-anchors_top = 0.75
-anchors_right = 0.8
-anchors_bottom = 1.0
-offset_top = 10.0
-offset_bottom = -10.0
+layout_mode = 0
+offset_left = 240.0
+offset_top = 520.0
+offset_right = 1040.0
+offset_bottom = 700.0
 script = ExtResource("5")
 
 [node name="CardsContainer" type="HBoxContainer" parent="Hand"]
 layout_mode = 1
-anchors_left = 0.0
-anchors_top = 0.0
-anchors_right = 1.0
-anchors_bottom = 1.0
-separation = 8
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+separation = 10
 alignment = 1
 
 [node name="PhaseLabel" type="Label" parent="."]
