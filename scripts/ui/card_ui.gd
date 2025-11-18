@@ -264,9 +264,14 @@ func _end_drag() -> void:
 	set_as_top_level(false)
 	z_index = 0
 
-	# Return card to hand (base position and rotation) with animation
+	# IMPORTANT: After set_as_top_level(false), position is now in local space
+	# Set position and rotation directly to base transform (no lerp needed)
 	position = base_position
 	rotation = base_rotation
+
+	# Update original_position to match where we just moved the card
+	# This prevents the _process lerp from moving it elsewhere
+	original_position = global_position
 
 	var tween = create_tween()
 	tween.set_trans(Tween.TRANS_QUAD)
@@ -396,6 +401,13 @@ func set_base_transform(pos: Vector2, rot: float) -> void:
 	"""
 	base_position = pos
 	base_rotation = rot
+
+	# Also immediately apply the transform if not currently dragging
+	if not is_being_dragged:
+		position = base_position
+		rotation = base_rotation
+		# Update original_position so _process doesn't move it
+		original_position = global_position
 
 
 # ============================================================================
