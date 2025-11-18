@@ -19,7 +19,7 @@ extends Control
 signal card_play_requested(card_id: String, champion_index: int, target_indices: Array[int])
 
 # Exported/Inspector properties
-@export var card_ui_scene: PackedScene  # Should be preloaded with: preload("res://scenes/ui/card_ui.tscn")
+@export var card_ui_scene: PackedScene = preload("res://scenes/ui/card_ui.tscn")
 
 # References
 @onready var cards_container: HBoxContainer = $CardsContainer
@@ -30,6 +30,7 @@ var selected_card: Control = null
 var targeting_mode: bool = false
 var target_type: String = ""
 var current_champion_index: int = -1
+var current_card_id: String = ""
 
 
 func _ready() -> void:
@@ -48,8 +49,8 @@ func clear_hand() -> void:
 
 
 # Add a card UI to the hand
-# _card_id: The unique identifier for the card (currently unused until card_ui fully implemented)
-func add_card_to_hand(_card_id: String) -> void:
+# card_id: The unique identifier for the card
+func add_card_to_hand(card_id: String) -> void:
 	if not card_ui_scene:
 		push_error("card_ui_scene not set in HandUI. Ensure card_ui_scene is assigned in inspector or preloaded.")
 		return
@@ -58,21 +59,25 @@ func add_card_to_hand(_card_id: String) -> void:
 	cards_container.add_child(card_ui)
 	current_cards.append(card_ui)
 
-	# TODO: Connect card_ui signals when card_ui.gd is ready
-	# card_ui.card_selected.connect(_on_card_selected.bind(card_ui))
-	# card_ui.card_dropped.connect(_on_card_dropped.bind(card_id))
+	# Initialize card with data
+	if card_ui.has_method("initialize"):
+		card_ui.initialize(card_id)
+
+	# Connect card signals
+	if card_ui.has_signal("card_dropped"):
+		card_ui.card_dropped.connect(_on_card_dropped)
 
 
 # Remove a card UI from the hand by card ID
-# _card_id: The unique identifier for the card to remove (currently unused until card_ui fully implemented)
-func remove_card_from_hand(_card_id: String) -> void:
+# card_id: The unique identifier for the card to remove
+func remove_card_from_hand(card_id: String) -> void:
 	for i in range(current_cards.size() - 1, -1, -1):
 		var card_ui = current_cards[i]
-		# TODO: Match by card_id when card_ui stores this information
-		# if card_ui.card_id == card_id:
-		card_ui.queue_free()
-		current_cards.remove_at(i)
-		break
+		# Match by card_id using the get_card_id() method
+		if card_ui.has_method("get_card_id") and card_ui.get_card_id() == card_id:
+			card_ui.queue_free()
+			current_cards.remove_at(i)
+			break
 
 	if selected_card and not selected_card.is_node_valid():
 		selected_card = null
@@ -96,9 +101,11 @@ func update_hand(card_ids: Array) -> void:
 # target_indices: The target indices (empty array if targeting mode needed)
 func _on_card_dropped(card_id: String, champion_index: int, target_indices: Array[int]) -> void:
 	current_champion_index = champion_index
+	current_card_id = card_id
 
-	# TODO: Get target_type from card data
-	var card_target_type: String = "single_enemy"  # Placeholder
+	# Get target_type from card data
+	var card_data: Dictionary = CardDatabase.get_card_data(card_id)
+	var card_target_type: String = card_data.get("target_type", "single_enemy")
 
 	# For single target types, enter targeting mode
 	if target_indices.is_empty() and card_target_type not in ["all_enemies", "all_allies"]:
@@ -134,6 +141,7 @@ func exit_targeting_mode() -> void:
 	target_type = ""
 	selected_card = null
 	current_champion_index = -1
+	current_card_id = ""
 
 	# TODO: Clear highlighting when champion/enemy display systems are ready
 	# _clear_target_highlighting()
@@ -147,12 +155,9 @@ func _on_champion_clicked(champion_index: int) -> void:
 
 	# Only allow targeting allies if target_type requires it
 	if target_type in ["single_ally", "all_allies"]:
-		if selected_card:
-			# TODO: Get card_id from selected_card
-			var card_id: String = ""  # Placeholder
-			var target_indices: Array[int] = [champion_index]
-			card_play_requested.emit(card_id, current_champion_index, target_indices)
-			exit_targeting_mode()
+		var target_indices: Array[int] = [champion_index]
+		card_play_requested.emit(current_card_id, current_champion_index, target_indices)
+		exit_targeting_mode()
 
 
 # Handle enemy being clicked during targeting
@@ -163,12 +168,9 @@ func _on_enemy_clicked(enemy_index: int) -> void:
 
 	# Only allow targeting enemies if target_type requires it
 	if target_type in ["single_enemy", "all_enemies"]:
-		if selected_card:
-			# TODO: Get card_id from selected_card
-			var card_id: String = ""  # Placeholder
-			var target_indices: Array[int] = [enemy_index]
-			card_play_requested.emit(card_id, current_champion_index, target_indices)
-			exit_targeting_mode()
+		var target_indices: Array[int] = [enemy_index]
+		card_play_requested.emit(current_card_id, current_champion_index, target_indices)
+		exit_targeting_mode()
 
 
 # Highlight valid targets based on target_type
@@ -209,10 +211,8 @@ func _auto_execute_all_targets() -> void:
 			for i in range(champion_count):
 				target_indices.append(i)
 
-	if selected_card and not target_indices.is_empty():
-		# TODO: Get card_id from selected_card
-		var card_id: String = ""  # Placeholder
-		card_play_requested.emit(card_id, current_champion_index, target_indices)
+	if not target_indices.is_empty():
+		card_play_requested.emit(current_card_id, current_champion_index, target_indices)
 		exit_targeting_mode()
 
 
@@ -225,10 +225,9 @@ func _clear_target_highlighting() -> void:
 
 # Get the card UI by card ID
 # Returns null if card not found
-func get_card_ui_by_id(_card_id: String) -> Control:
+func get_card_ui_by_id(card_id: String) -> Control:
 	for card_ui in current_cards:
-		# TODO: Match by card_id when card_ui stores this information
-		# if card_ui.card_id == card_id:
-		#	return card_ui
-		pass
+		# Match by card_id using the get_card_id() method
+		if card_ui.has_method("get_card_id") and card_ui.get_card_id() == card_id:
+			return card_ui
 	return null

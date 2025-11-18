@@ -137,7 +137,7 @@ func initialize(card_id: String) -> void:
 		card_id: The unique identifier of the card to load
 	"""
 	# Get card data from CardDatabase (assuming it's a global autoload)
-	card_data = CardDatabase.get_card(card_id)
+	card_data = CardDatabase.get_card_data(card_id)
 
 	if card_data.is_empty():
 		push_error("Card with ID '%s' not found in CardDatabase" % card_id)
@@ -157,7 +157,7 @@ func initialize(card_id: String) -> void:
 		description_label.text = card_data.get("description", "")
 
 	# Set background color based on champion
-	var champion_id = card_data.get("champion_id", "")
+	var champion_id = card_data.get("champion", "")
 	var champion_color = get_champion_color(champion_id)
 	if background_panel:
 		background_panel.color = champion_color
@@ -279,13 +279,12 @@ func get_champion_color(champion_id: String) -> Color:
 	Returns:
 		Color: RGBA color for the champion, or default gray if not found
 	"""
-	# Color mapping for different champions
+	# Color mapping for different champions (matches data/champions.json)
 	var champion_colors: Dictionary = {
-		"champion_1": Color(0.8, 0.2, 0.2, 0.9),  # Red
-		"champion_2": Color(0.2, 0.8, 0.2, 0.9),  # Green
-		"champion_3": Color(0.2, 0.2, 0.8, 0.9),  # Blue
-		"champion_4": Color(0.8, 0.8, 0.2, 0.9),  # Yellow
-		"champion_5": Color(0.8, 0.2, 0.8, 0.9),  # Magenta
+		"warrior": Color(1.0, 0.2, 0.2, 0.9),      # Red
+		"defender": Color(0.2, 0.4, 1.0, 0.9),    # Blue
+		"healer": Color(0.2, 1.0, 0.2, 0.9),      # Green
+		"fire_knight": Color(1.0, 0.6, 0.2, 0.9)  # Orange
 	}
 
 	# Return color if champion exists, otherwise default gray

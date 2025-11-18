@@ -149,6 +149,9 @@ func _connect_ui_signals() -> void:
 	if continue_button:
 		continue_button.pressed.connect(_on_continue_button_pressed)
 
+	if hand_ui and hand_ui.has_signal("card_play_requested"):
+		hand_ui.card_play_requested.connect(_on_card_play_requested)
+
 
 ## Called when a new turn phase starts
 func _on_turn_started(phase: String) -> void:
@@ -369,6 +372,23 @@ func _on_end_turn_button_pressed() -> void:
 
 	if battle_manager and battle_manager.current_phase == "player_turn":
 		battle_manager.end_player_turn()
+
+
+## Called when player requests to play a card
+func _on_card_play_requested(card_id: String, champion_index: int, target_indices: Array[int]) -> void:
+	print("BattleScene: Card play requested - %s by champion %d" % [card_id, champion_index])
+
+	if not battle_manager:
+		return
+
+	# Attempt to play the card
+	var success = battle_manager.play_card(card_id, champion_index, target_indices)
+
+	if success:
+		# Update displays after successful card play
+		update_all_displays()
+	else:
+		print("BattleScene: Failed to play card %s" % card_id)
 
 
 ## Show the victory or defeat screen with results
