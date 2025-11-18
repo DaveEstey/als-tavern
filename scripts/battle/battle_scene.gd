@@ -98,7 +98,15 @@ func _ready() -> void:
 
 	# Initialize battle with enemies from GameManager
 	if game_manager and "current_battle_enemies" in game_manager:
-		var enemy_ids = game_manager.current_battle_enemies
+		var enemy_ids: Array[String] = []
+		var raw_enemies = game_manager.current_battle_enemies
+
+		# Ensure proper typing
+		if raw_enemies is Array:
+			for enemy in raw_enemies:
+				if enemy is String:
+					enemy_ids.append(enemy)
+
 		if enemy_ids.is_empty():
 			push_warning("No enemies set in GameManager, using default test enemies")
 			enemy_ids = ["goblin", "skeleton"]
@@ -140,6 +148,32 @@ func _connect_ui_signals() -> void:
 
 	if continue_button:
 		continue_button.pressed.connect(_on_continue_button_pressed)
+
+	if hand_ui and hand_ui.has_signal("card_play_requested"):
+		hand_ui.card_play_requested.connect(_on_card_play_requested)
+
+	# Connect champion and enemy display targeting signals to hand_ui
+	_connect_display_targeting_signals()
+
+
+## Connect champion and enemy display targeting signals to hand_ui
+func _connect_display_targeting_signals() -> void:
+	if not hand_ui:
+		return
+
+	# Connect each champion display's targeting signal
+	for i in range(champion_displays.size()):
+		var display = champion_displays[i]
+		if display and display.has_signal("champion_clicked_for_targeting"):
+			if hand_ui.has_method("_on_champion_clicked"):
+				display.champion_clicked_for_targeting.connect(hand_ui._on_champion_clicked)
+
+	# Connect each enemy display's targeting signal
+	for i in range(enemy_displays.size()):
+		var display = enemy_displays[i]
+		if display and display.has_signal("enemy_clicked_for_targeting"):
+			if hand_ui.has_method("_on_enemy_clicked"):
+				display.enemy_clicked_for_targeting.connect(hand_ui._on_enemy_clicked)
 
 
 ## Called when a new turn phase starts
@@ -361,6 +395,23 @@ func _on_end_turn_button_pressed() -> void:
 
 	if battle_manager and battle_manager.current_phase == "player_turn":
 		battle_manager.end_player_turn()
+
+
+## Called when player requests to play a card
+func _on_card_play_requested(card_id: String, champion_index: int, target_indices: Array[int]) -> void:
+	print("BattleScene: Card play requested - %s by champion %d" % [card_id, champion_index])
+
+	if not battle_manager:
+		return
+
+	# Attempt to play the card
+	var success = battle_manager.play_card(card_id, champion_index, target_indices)
+
+	if success:
+		# Update displays after successful card play
+		update_all_displays()
+	else:
+		print("BattleScene: Failed to play card %s" % card_id)
 
 
 ## Show the victory or defeat screen with results
