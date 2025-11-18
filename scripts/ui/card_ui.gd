@@ -29,7 +29,7 @@ signal card_hovered(card_id: String)
 
 ## Emitted when card is dropped on a champion
 ## Parameters: card_id, champion_index, target_indices (affected units/areas)
-signal card_dropped(card_id: String, champion_index: int, target_indices: Array)
+signal card_dropped(card_id: String, champion_index: int, target_indices: Array[int])
 
 
 # ============================================================================
@@ -180,7 +180,12 @@ func _start_drag() -> void:
 	Stores original position and calculates mouse offset for smooth dragging.
 	"""
 	is_being_dragged = true
-	original_position = global_position
+
+	# Store position in parent's coordinate system before going top-level
+	if get_parent():
+		original_position = get_parent().global_position + position
+	else:
+		original_position = global_position
 
 	# Make this card render on top and move freely
 	set_as_top_level(true)
@@ -212,12 +217,15 @@ func _end_drag() -> void:
 	# Check if we have a valid champion target
 	if selected_champion_index >= 0:
 		# Valid drop on champion
-		var target_indices: Array = []
+		var target_indices: Array[int] = []
 
 		# Add any additional target information if needed
 		# (e.g., if card targets multiple units)
 		if card_data.has("target_indices"):
-			target_indices = card_data.get("target_indices", [])
+			var raw_targets = card_data.get("target_indices", [])
+			for t in raw_targets:
+				if t is int:
+					target_indices.append(t)
 
 		# Emit the drop signal
 		card_dropped.emit(

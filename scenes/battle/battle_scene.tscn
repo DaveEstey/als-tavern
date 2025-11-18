@@ -55,13 +55,14 @@ layout_mode = 2
 
 [node name="EnemiesContainer" type="HBoxContainer" parent="."]
 layout_mode = 1
-anchors_left = 0.8
+anchors_left = 0.75
 anchors_top = 0.1
-anchors_right = 1.0
+anchors_right = 0.95
 anchors_bottom = 0.9
 offset_left = 10.0
 offset_right = -10.0
 separation = 10
+alignment = 1
 
 [node name="EnemyDisplay1" parent="EnemiesContainer" instance=ExtResource("4")]
 custom_minimum_size = Vector2(120, 200)
@@ -77,11 +78,12 @@ layout_mode = 2
 
 [node name="Hand" type="Control" parent="."]
 layout_mode = 1
-anchors_left = 0.25
-anchors_top = 0.85
-anchors_right = 0.75
+anchors_left = 0.2
+anchors_top = 0.75
+anchors_right = 0.8
 anchors_bottom = 1.0
-offset_top = -100.0
+offset_top = 10.0
+offset_bottom = -10.0
 script = ExtResource("5")
 
 [node name="CardsContainer" type="HBoxContainer" parent="Hand"]
