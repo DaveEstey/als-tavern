@@ -186,17 +186,34 @@ func _start_drag() -> void:
 	"""
 	is_being_dragged = true
 
-	# Store current base position/rotation to return to later
-	original_position = get_parent().global_position + base_position if get_parent() else global_position
+	# Debug: Print positions before drag
+	print("CardUI: Start drag - position: %v, base_position: %v, global_position: %v" % [position, base_position, global_position])
+	if get_parent():
+		print("  Parent global_position: %v" % get_parent().global_position)
+
+	# Store current GLOBAL position before going top-level
+	# This is where the card actually appears on screen
+	var current_global_pos = global_position
+	original_position = current_global_pos
 	original_rotation = base_rotation
+
+	print("  Stored original_position: %v" % original_position)
 
 	# Make this card render on top and move freely
 	set_as_top_level(true)
 	z_index = 100
 
+	# CRITICAL: Set position to global coordinates after set_as_top_level
+	# When top-level, position is in global space, not local to parent
+	global_position = current_global_pos
+
+	print("  After set_as_top_level - set global_position to: %v" % global_position)
+
 	# Calculate offset between card center and mouse position
 	var mouse_pos = get_global_mouse_position()
 	drag_offset = global_position - mouse_pos
+
+	print("  Mouse position: %v, drag_offset: %v" % [mouse_pos, drag_offset])
 
 	# Reset rotation when dragging (cards should be flat when being dragged)
 	rotation = 0.0
