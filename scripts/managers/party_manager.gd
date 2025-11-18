@@ -55,6 +55,29 @@ func get_champion_progress(champion_id: String) -> Dictionary:
 	"""Get progress data for a champion"""
 	return champion_progress.get(champion_id, {})
 
+func get_champion_data(champion_id: String) -> Dictionary:
+	"""Get full champion data including base data and progress"""
+	var progress = champion_progress.get(champion_id, {})
+	if progress.is_empty():
+		return {}
+
+	var base_data = CardDatabase.get_champion_data(champion_id)
+	if base_data.is_empty():
+		return {}
+
+	# Combine base data with progress data
+	return {
+		"id": champion_id,
+		"name": base_data.get("name", "Unknown"),
+		"level": progress.get("level", 1),
+		"current_hp": progress.get("current_hp", 30),
+		"max_hp": progress.get("max_hp", 30),
+		"damage": progress.get("damage", 5),
+		"defense": progress.get("defense", 5),
+		"unlocked_cards": progress.get("unlocked_cards", []),
+		"selected_cards": progress.get("selected_cards", [])
+	}
+
 func add_xp_to_party(xp_amount: int):
 	"""Add XP to all active party members"""
 	for champ_id in active_party:

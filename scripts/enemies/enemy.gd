@@ -26,8 +26,9 @@ var card_database: Node
 
 func _ready() -> void:
 	## Initialize card database reference
-	card_database = get_tree().root.get_child(0).get_node_or_null("CardDatabase")
-	if not card_database:
+	if has_node("/root/CardDatabase"):
+		card_database = get_node("/root/CardDatabase")
+	else:
 		push_error("CardDatabase not found. Make sure it's set up as an autoload.")
 
 
