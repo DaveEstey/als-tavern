@@ -334,8 +334,13 @@ func update_enemy_displays() -> void:
 		if i < battle_manager.enemies.size():
 			var enemy = battle_manager.enemies[i]
 
+			if display and display.has_method("initialize"):
+				# Initialize display with enemy data
+				display.initialize(enemy, i)
+
 			if display and display.has_method("update_display"):
-				display.update_display(enemy)
+				# Update the display visuals
+				display.update_display()
 				display.visible = not enemy.get("is_dead", false)
 			elif display:
 				display.visible = not enemy.get("is_dead", false)

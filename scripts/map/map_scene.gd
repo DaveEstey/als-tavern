@@ -416,10 +416,10 @@ func _start_battle(node: Dictionary) -> void:
 func _generate_battle_enemies(enemy_type: String, count: int) -> Array:
 	var enemies: Array = []
 
-	# These would normally come from CardDatabase or enemy pool
-	var trash_pool = ["goblin", "skeleton", "slime"]
-	var elite_pool = ["orc_warrior", "dark_mage", "minotaur"]
-	var boss_pool = ["dragon", "lich_king", "demon_lord"]
+	# Enemy pools matching enemies.json IDs
+	var trash_pool = ["goblin_scout", "skeleton_warrior", "wolf", "bandit"]
+	var elite_pool = ["dark_mage", "orc_grunt", "venomous_spider", "orc_warlord"]
+	var boss_pool = ["lich", "fire_knight"]
 
 	var pool: Array = []
 	match enemy_type:
@@ -431,7 +431,7 @@ func _generate_battle_enemies(enemy_type: String, count: int) -> Array:
 			pool = boss_pool
 
 	if pool.is_empty():
-		pool = ["goblin"]  # Fallback
+		pool = ["goblin_scout"]  # Fallback
 
 	for i in range(count):
 		var random_enemy = pool[randi() % pool.size()]

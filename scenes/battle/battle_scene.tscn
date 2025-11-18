@@ -91,6 +91,7 @@ anchors_top = 0.0
 anchors_right = 1.0
 anchors_bottom = 1.0
 separation = 8
+alignment = 1
 
 [node name="PhaseLabel" type="Label" parent="."]
 layout_mode = 1
