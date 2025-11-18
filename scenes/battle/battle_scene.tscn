@@ -141,11 +141,11 @@ text = "Discard: 0"
 theme_override_font_sizes/font_size = 12
 
 [node name="EndTurnButton" type="Button" parent="."]
-layout_mode = 1
-anchors_left = 0.85
-anchors_top = 0.92
-anchors_right = 0.98
-anchors_bottom = 0.98
+layout_mode = 0
+offset_left = 1090.0
+offset_top = 660.0
+offset_right = 1250.0
+offset_bottom = 705.0
 text = "End Turn"
 theme_override_styles/normal = SubResource("StyleBoxFlat_button")
 
