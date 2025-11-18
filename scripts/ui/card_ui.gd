@@ -120,6 +120,9 @@ func _process(delta: float) -> void:
 		# Update position to follow mouse
 		var mouse_pos = get_global_mouse_position()
 		global_position = mouse_pos + drag_offset
+
+		# Check if hovering over a champion
+		_check_champion_hover()
 	else:
 		# Smoothly return to original position
 		global_position = global_position.lerp(original_position, delta / animation_speed)
@@ -179,6 +182,10 @@ func _start_drag() -> void:
 	is_being_dragged = true
 	original_position = global_position
 
+	# Make this card render on top and move freely
+	set_as_top_level(true)
+	z_index = 100
+
 	# Calculate offset between card center and mouse position
 	var mouse_pos = get_global_mouse_position()
 	drag_offset = global_position - mouse_pos
@@ -221,6 +228,10 @@ func _end_drag() -> void:
 
 		# Reset selection
 		selected_champion_index = -1
+
+	# Return to normal rendering mode
+	set_as_top_level(false)
+	z_index = 0
 
 	# Return card to hand (original position) with animation
 	var tween = create_tween()
@@ -339,3 +350,50 @@ func get_card_cost() -> int:
 		int: The card's cost
 	"""
 	return card_data.get("cost", 0)
+
+
+# ============================================================================
+# CHAMPION HOVER DETECTION
+# ============================================================================
+
+func _check_champion_hover() -> void:
+	"""
+	Check if mouse is hovering over a champion display during drag.
+	Updates selected_champion_index and highlights the champion.
+	"""
+	# Find all champion displays in the scene
+	var battle_scene = get_tree().current_scene
+	if not battle_scene:
+		return
+
+	var champions_container = battle_scene.get_node_or_null("ChampionsContainer")
+	if not champions_container:
+		return
+
+	var mouse_pos = get_global_mouse_position()
+	var new_champion_index = -1
+
+	# Check each champion display
+	for i in range(champions_container.get_child_count()):
+		var champion_display = champions_container.get_child(i)
+		if champion_display and champion_display.has_method("get_global_rect"):
+			var rect = champion_display.get_global_rect()
+			if rect.has_point(mouse_pos):
+				new_champion_index = i
+				break
+
+	# Update highlight if champion changed
+	if new_champion_index != selected_champion_index:
+		# Clear old highlight
+		if selected_champion_index >= 0 and selected_champion_index < champions_container.get_child_count():
+			var old_display = champions_container.get_child(selected_champion_index)
+			if old_display and old_display.has_method("set_highlighted"):
+				old_display.set_highlighted(false)
+
+		# Set new highlight
+		selected_champion_index = new_champion_index
+		if selected_champion_index >= 0:
+			var new_display = champions_container.get_child(selected_champion_index)
+			if new_display and new_display.has_method("set_highlighted"):
+				# Highlight with card's champion color
+				new_display.set_highlighted(true)
