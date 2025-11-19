@@ -6,7 +6,7 @@ This guide will walk you through setting up and running the GUT (Godot Unit Test
 
 The following has already been set up for you:
 
-- ✅ Downloaded and installed GUT framework v9.3.0 to `addons/gut/`
+- ✅ Downloaded and installed GUT framework v9.5.0 to `addons/gut/`
 - ✅ Enabled GUT plugin in `project.godot`
 - ✅ Created test directory structure (`tests/unit/` and `tests/integration/`)
 - ✅ Created GUT configuration file (`.gutconfig.json`)
