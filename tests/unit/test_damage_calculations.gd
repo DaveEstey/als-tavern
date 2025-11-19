@@ -6,7 +6,7 @@ var champion: Champion
 
 func before_each():
 	"""Setup before each test - create fresh Champion instance"""
-	champion = Champion.new()
+	champion = autofree(Champion.new())
 
 	# Initialize with a valid champion ID (this will try to load from PartyManager)
 	champion.initialize("warrior")
@@ -22,7 +22,7 @@ func before_each():
 
 func after_each():
 	"""Cleanup after each test"""
-	champion.queue_free()
+	# Champion is auto-freed by GUT's autofree()
 	champion = null
 
 
@@ -275,6 +275,7 @@ func test_very_high_defense():
 
 func test_ko_champion_state():
 	"""Test that KO'd champion has correct state"""
+	champion.defense = 0  # Remove defense for clearer test
 	champion.take_damage(100)
 
 	assert_true(champion.is_ko, "Should be marked as KO")
@@ -283,7 +284,8 @@ func test_ko_champion_state():
 
 func test_revive_from_ko():
 	"""Test revival mechanics"""
-	# Kill the champion
+	# Kill the champion (disable defense for clearer test)
+	champion.defense = 0
 	champion.take_damage(100)
 	assert_true(champion.is_ko, "Should be KO'd")
 
@@ -296,6 +298,7 @@ func test_revive_from_ko():
 
 func test_revive_cannot_exceed_max_hp():
 	"""Test that revival respects max HP"""
+	champion.defense = 0  # Remove defense for clearer test
 	champion.take_damage(100)
 
 	champion.revive(150)  # Try to revive with more than max HP
