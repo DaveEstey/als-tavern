@@ -8,16 +8,20 @@ func before_each():
 	"""Setup before each test - create fresh Champion instance"""
 	champion = autofree(Champion.new())
 
-	# Initialize with a valid champion ID (this will try to load from PartyManager)
-	champion.initialize("warrior")
-
-	# Override with test values for consistent testing
+	# Don't call initialize() - it tries to access the scene tree
+	# Instead, manually set all properties for isolated unit testing
+	champion.champion_id = "warrior"
+	champion.champion_name = "Test Warrior"
 	champion.max_hp = 100
 	champion.current_hp = 100
 	champion.damage = 10
 	champion.defense = 10
 	champion.block = 0
 	champion.is_ko = false
+	champion.level = 1
+	champion.regen_stacks = []
+	champion.buffs = []
+	champion.debuffs = []
 
 
 func after_each():

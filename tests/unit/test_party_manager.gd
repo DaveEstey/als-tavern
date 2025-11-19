@@ -51,11 +51,8 @@ func test_set_active_party_rejects_wrong_size():
 	"""Test that setting party with wrong size fails (doesn't change party)"""
 	var original_party = party_manager.get_active_party().duplicate()
 
-	# Try to set party with 2 champions (should fail and log error)
+	# Try to set party with 2 champions (should fail and log error - this is expected)
 	party_manager.set_active_party(["warrior", "healer"])
-
-	# Clear the expected error from GUT's error tracker
-	gut.get_logger().clear_errors()
 
 	var party_after = party_manager.get_active_party()
 	assert_eq(party_after, original_party, "Party should not change when invalid size given")
@@ -98,11 +95,8 @@ func test_set_selected_cards_rejects_wrong_count():
 	"""Test that setting wrong number of cards doesn't change selection"""
 	var original_cards = party_manager.get_champion_progress("warrior")["selected_cards"].duplicate()
 
-	# Try to set 3 cards (should fail and log error - needs exactly 5)
+	# Try to set 3 cards (should fail and log error - needs exactly 5, this is expected)
 	party_manager.set_selected_cards("warrior", ["strike", "defend", "reckless_assault"])
-
-	# Clear the expected error from GUT's error tracker
-	gut.get_logger().clear_errors()
 
 	var cards_after = party_manager.get_champion_progress("warrior")["selected_cards"]
 	assert_eq(cards_after, original_cards, "Selected cards should not change when invalid count given")
