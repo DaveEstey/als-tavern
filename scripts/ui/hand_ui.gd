@@ -245,9 +245,8 @@ func _on_champion_clicked(champion_index: int) -> void:
 		var champ_idx = current_champion_index
 		var card_id = current_card_id
 
-		# Remove card from hand after target is selected (only if it's a real card, not "basic_attack")
-		if current_card_id != "" and current_card_id != "basic_attack":
-			remove_card_from_hand(current_card_id)
+		# Don't remove card from hand here - it will be removed automatically
+		# when battle_manager.play_card() is called and emits card_played signal
 
 		# Emit signal to store targets (use stored values)
 		card_play_requested.emit(card_id, champ_idx, target_indices)
@@ -272,9 +271,8 @@ func _on_enemy_clicked(enemy_index: int) -> void:
 		var champ_idx = current_champion_index
 		var card_id = current_card_id
 
-		# Remove card from hand after target is selected (only if it's a real card, not "basic_attack")
-		if current_card_id != "" and current_card_id != "basic_attack":
-			remove_card_from_hand(current_card_id)
+		# Don't remove card from hand here - it will be removed automatically
+		# when battle_manager.play_card() is called and emits card_played signal
 
 		# Emit signal to store targets (use stored values)
 		card_play_requested.emit(card_id, champ_idx, target_indices)
