@@ -215,10 +215,6 @@ func _draw_new_hand() -> void:
 
 	print("BattleScene: Resetting hand for new turn")
 
-	# Reset the played cards tracker for new turn
-	if hand_ui.has_method("reset_turn"):
-		hand_ui.reset_turn()
-
 	# Note: battle_manager.start_player_turn() already calls draw_cards(5)
 	# The card_drawn signals will update hand_ui automatically
 

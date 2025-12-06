@@ -38,9 +38,6 @@ var target_type: String = ""
 var current_champion_index: int = -1
 var current_card_id: String = ""
 
-# Track which cards have been played this turn (can't be played again)
-var played_cards_this_turn: Array[String] = []
-
 
 func _ready() -> void:
 	# Cards are now added directly to this Control node
@@ -55,12 +52,6 @@ func clear_hand() -> void:
 	current_cards.clear()
 	selected_card = null
 	exit_targeting_mode()
-
-
-# Clear played cards tracking for new turn
-func reset_turn() -> void:
-	played_cards_this_turn.clear()
-	print("HandUI: Cleared played cards tracking for new turn")
 
 
 # Add a card UI to the hand
@@ -133,11 +124,6 @@ func _on_card_dropped(card_id: String, champion_index: int, target_indices: Arra
 	var card_target_type: String = card_data.get("target_type", "single_enemy")
 	var card_name: String = card_data.get("name", "Card")
 
-	# Check if card has already been played this turn
-	if card_id in played_cards_this_turn:
-		print("HandUI: Card %s already played this turn, ignoring" % card_id)
-		return
-
 	# Get the champion this card is being dropped on
 	var battle_scene = get_tree().current_scene
 	if not battle_scene:
@@ -167,23 +153,20 @@ func _on_card_dropped(card_id: String, champion_index: int, target_indices: Arra
 	current_champion_index = champion_index
 	current_card_id = card_id
 
-	# Queue the card on the champion display
-	var previous_card_id = ""
+	# Queue the card on the champion display and get any replaced card
+	var replaced_card_id = ""
 	if champion_display.has_method("queue_card_action"):
-		previous_card_id = champion_display.queue_card_action(card_id, card_name)
+		replaced_card_id = champion_display.queue_card_action(card_id, card_name)
 
-	# If there was a previous card queued, remove it from played list and return to hand
-	if previous_card_id != "" and previous_card_id != card_id:
-		if previous_card_id in played_cards_this_turn:
-			played_cards_this_turn.erase(previous_card_id)
-		add_card_to_hand(previous_card_id)
+	# If a card was replaced, return it to hand
+	if replaced_card_id != "":
+		add_card_to_hand(replaced_card_id)
 
-	# Mark this card as played
-	played_cards_this_turn.append(card_id)
+	# Remove the current card from hand (it's now queued on the champion)
+	remove_card_from_hand(card_id)
 
 	# Enter targeting mode if card needs a target
 	if card_target_type not in ["all_enemies", "all_allies", "self"]:
-		# Don't remove card yet - wait for target selection
 		print("HandUI: Entering targeting mode for %s (target_type: %s)" % [card_name, card_target_type])
 		enter_targeting_mode(null, card_target_type)
 	else:
@@ -192,10 +175,8 @@ func _on_card_dropped(card_id: String, champion_index: int, target_indices: Arra
 		# For "all_enemies" and "all_allies", also pass empty array
 		target_indices = []
 
-		# Don't remove card from hand here - it will be removed automatically
-		# when battle_manager.play_card() is called and emits card_played signal
-
-		# Store targets for execution
+		# Card was already removed from hand when queued
+		# Now just emit signal with target information
 		card_play_requested.emit(card_id, champion_index, target_indices)
 		exit_targeting_mode()
 
@@ -245,10 +226,8 @@ func _on_champion_clicked(champion_index: int) -> void:
 		var champ_idx = current_champion_index
 		var card_id = current_card_id
 
-		# Don't remove card from hand here - it will be removed automatically
-		# when battle_manager.play_card() is called and emits card_played signal
-
-		# Emit signal to store targets (use stored values)
+		# Card was already removed from hand when queued
+		# Now just emit signal with target information
 		card_play_requested.emit(card_id, champ_idx, target_indices)
 		exit_targeting_mode()
 
@@ -271,10 +250,8 @@ func _on_enemy_clicked(enemy_index: int) -> void:
 		var champ_idx = current_champion_index
 		var card_id = current_card_id
 
-		# Don't remove card from hand here - it will be removed automatically
-		# when battle_manager.play_card() is called and emits card_played signal
-
-		# Emit signal to store targets (use stored values)
+		# Card was already removed from hand when queued
+		# Now just emit signal with target information
 		card_play_requested.emit(card_id, champ_idx, target_indices)
 		exit_targeting_mode()
 	else:
