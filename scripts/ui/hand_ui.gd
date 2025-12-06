@@ -192,8 +192,8 @@ func _on_card_dropped(card_id: String, champion_index: int, target_indices: Arra
 		# For "all_enemies" and "all_allies", also pass empty array
 		target_indices = []
 
-		# Remove card from hand after queueing
-		remove_card_from_hand(card_id)
+		# Don't remove card from hand here - it will be removed automatically
+		# when battle_manager.play_card() is called and emits card_played signal
 
 		# Store targets for execution
 		card_play_requested.emit(card_id, champion_index, target_indices)
